@@ -247,6 +247,8 @@ URLText
 #define PANEL_TARGET 2 // cilovy panel (neaktivni panel)
 #define PANEL_LEFT 3   // levy panel
 #define PANEL_RIGHT 4  // pravy panel
+#define PANEL_BOTTOM_LEFT 5   // levy panel
+#define PANEL_BOTTOM_RIGHT 6  // pravy panel
 
 // typy cest
 #define PATH_TYPE_WINDOWS 1 // windowsova cesta ("c:\path" nebo UNC cesta)
