@@ -1,6 +1,29 @@
-# Open Salamander
+# Quad Salamander
 
-Open Salamander is a fast and reliable two-panel file manager for Windows.
+Open Salamander is a fast and reliable two-panel file manager for Windows, which was released recently as open source on github. 
+Quad Salamander is a modification of it, which adds in total 4 file managers.
+
+Quad Salamander is fully functional and many things were well thought out so that it works as a true quad file manager (drag/drop between all panels, using tab or shift+tab to change active panel, resizing panels, swapping panels, etc.). It can easily be used as a beaseline for further work in that direction.
+
+There are several smaller changes complementing the 4 panels such as:
+-added "Age" column: showing the time interval since file modified datetime.
+-added music, pictures, videos, downloads, and desktop user folders to the drive bar
+
+The only projects that were modified were:
+-salamand
+-lang (English)
+Both of which are part of the solution salamander_lite.sln.
+Projects require VisualStudio 2019 with Windows10 SDK. However this can be easily changed (OpenSalamander uses VS2022).
+
+
+The Quad Salamander should still support all the plugins, but the plugin will be aware only about the top left and top right panels. No exapnsion of the plugins interface is made, to ensure the compatibility.
+
+It's was nice after so many years since Servant Salamander was released to be able to work on its source code for a while. Thanks!
+
+
+
+
+The rest of the information is comming from Open Salamander:
 
 ## Origin
 
