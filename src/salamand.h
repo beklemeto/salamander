@@ -317,6 +317,8 @@ extern int TransferAssocIndex; // -2 jeste se nehledala, -1 neni tam, >=0 platny
 void WINAPI InternalGetDosName();
 void WINAPI InternalGetSize();
 void WINAPI InternalGetType();
+void WINAPI InternalGetAge();
+void WINAPI InternalGetAgeOnlyForDisk();
 void WINAPI InternalGetDate();
 void WINAPI InternalGetDateOnlyForDisk();
 void WINAPI InternalGetTime();
@@ -332,7 +334,7 @@ int WINAPI InternalGetPluginIconIndex();
 // CViews
 //
 
-#define STANDARD_COLUMNS_COUNT 9 // pocet standardnich sloupcu pro rozsah
+#define STANDARD_COLUMNS_COUNT 10 // pocet standardnich sloupcu pro rozsah
 #define VIEW_TEMPLATES_COUNT 10
 #define VIEW_NAME_MAX 30
 // sloupec Name je vzdy viditelny a pokud neni nastaven flag VIEW_SHOW_EXTENSION, obsahuje i priponu
@@ -344,6 +346,7 @@ int WINAPI InternalGetPluginIconIndex();
 #define VIEW_SHOW_TIME 0x00000020
 #define VIEW_SHOW_ATTRIBUTES 0x00000040
 #define VIEW_SHOW_DESCRIPTION 0x00000080
+#define VIEW_SHOW_AGE 0x00000100
 
 // struktura pro definici jednoho standardniho sloupce
 struct CColumDataItem
@@ -375,6 +378,11 @@ struct CColumnConfig
     unsigned RightWidth : 16;
     unsigned LeftFixedWidth : 1;
     unsigned RightFixedWidth : 1;
+
+    unsigned BottomLeftWidth : 16;
+    unsigned BottomRightWidth : 16;
+    unsigned BottomLeftFixedWidth : 1;
+    unsigned BottomRightFixedWidth : 1;
 };
 
 struct CViewTemplate
@@ -388,7 +396,9 @@ struct CViewTemplate
     CColumnConfig Columns[STANDARD_COLUMNS_COUNT]; // drzi sirky a elasticitu sloupcu
 
     BOOL LeftSmartMode;  // smart mode pro levy panel (jen elasticky sloupec Name: sloupec se zuzuje, aby nebyla potreba horizontalni scrollbara)
-    BOOL RightSmartMode; // smart mode pro pravy panel (jen elasticky sloupec Name: sloupec se zuzuje, aby nebyla potreba horizontalni scrollbara)
+    BOOL RightSmartMode; // smart mode pro pravy panel (jen elasticky sloupec Name: sloupec se zuzuje, aby nebyla potreba horizontalni scrollbara)BOOL LeftSmartMode;  // smart mode pro levy panel (jen elasticky sloupec Name: sloupec se zuzuje, aby nebyla potreba horizontalni scrollbara)
+    BOOL BottomRightSmartMode; // smart mode pro pravy panel (jen elasticky sloupec Name: sloupec se zuzuje, aby nebyla potreba horizontalni scrollbara)BOOL LeftSmartMode;  // smart mode pro levy panel (jen elasticky sloupec Name: sloupec se zuzuje, aby nebyla potreba horizontalni scrollbara)
+    BOOL BottomLeftSmartMode;  // smart mode pro levy panel (jen elasticky sloupec Name: sloupec se zuzuje, aby nebyla potreba horizontalni scrollbara)
 };
 
 class CViewTemplates
@@ -402,8 +412,8 @@ public:
     CViewTemplates();
 
     // nastavi atributy
-    void Set(DWORD index, DWORD viewMode, const char* name, DWORD flags, BOOL leftSmartMode, BOOL rightSmartMode);
-    void Set(DWORD index, const char* name, DWORD flags, BOOL leftSmartMode, BOOL rightSmartMode);
+    void Set(DWORD index, DWORD viewMode, const char* name, DWORD flags, BOOL leftSmartMode = TRUE, BOOL rightSmartMode = TRUE, BOOL bottomLeftSmartMode = TRUE, BOOL bottomRightSmartMode = TRUE);
+    void Set(DWORD index, const char* name, DWORD flags, BOOL leftSmartMode = TRUE, BOOL rightSmartMode = TRUE, BOOL bottomLeftSmartMode = TRUE, BOOL bottomRightSmartMode = TRUE);
 
     BOOL SwapItems(int index1, int index2); // prohodi dve polozky v poli
     BOOL CleanName(char* name);             // oreze mezery a vrati TRUE, je-li name ok

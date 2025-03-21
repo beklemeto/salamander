@@ -30,6 +30,10 @@ struct CButtonData
     DWORD* LeftEnabler;             // ridici promenna pro enablovani tlacitka
     DWORD* RightEnabler;            // ridici promenna pro enablovani tlacitka
     const char* SVGName;            // NULL pokud tlacitko nema SVG reprezentaci
+    unsigned int BottomLeftID : 16;       // Command pro dolu levy panel
+    unsigned int BottomRightID : 16;      // Command pro dolu pravy panel
+    DWORD* BottomLeftEnabler;             // ridici promenna pro enablovani tlacitka
+    DWORD* BottomRightEnabler;            // ridici promenna pro enablovani tlacitka
 };
 
 //****************************************************************************
@@ -139,8 +143,10 @@ struct CButtonData
 #define TBBE_SHOW_ALL 96
 #define TBBE_OPEN_MYDOC 97
 #define TBBE_SMART_COLUMN_MODE 98
+#define TBBE_CHANGE_DRIVE_BL 99         //  added for bottom panels
+#define TBBE_CHANGE_DRIVE_BR 100        //  added for bottom panels
 
-#define TBBE_TERMINATOR 99 // terminator
+#define TBBE_TERMINATOR 101 // terminator
 
 #define NIB1(x) x
 #define NIB2(x) x,
@@ -148,107 +154,110 @@ struct CButtonData
 
 CButtonData ToolBarButtons[TBBE_TERMINATOR] =
     {
-        //                          ImageIndex        Shell32ResID ToolTipResID             ID                          LeftID              RightID      DropDown WD Chk Enabler                       LeftEnabler                   RightEnabler             SVGName
-        /*TBBE_CONNECT_NET*/ {NIB1(IDX_TB_CONNECTNET), 0, IDS_TBTT_CONNECTNET, CM_CONNECTNET, 0, 0, 0, 0, 0, NULL, NULL, NULL, "ConnectNetworkDrive"},
-        /*TBBE_DISCONNECT_NET*/ {IDX_TB_DISCONNECTNET, 0, IDS_TBTT_DISCONNECTNET, CM_DISCONNECTNET, 0, 0, 0, 0, 0, NULL, NULL, NULL, "Disconnect"},
-        /*TBBE_CREATE_DIR*/ {IDX_TB_CREATEDIR, 0, IDS_TBTT_CREATEDIR, CM_CREATEDIR, 0, 0, 0, 0, 0, &EnablerCreateDir, NULL, NULL, "CreateDirectory"},
-        /*TBBE_FIND_FILE*/ {IDX_TB_FINDFILE, 0, IDS_TBTT_FINDFILE, CM_FINDFILE, 0, 0, 0, 0, 0, NULL, NULL, NULL, "FindFilesAndDirectories"},
-        /*TBBE_VIEW_MODE*/ {IDX_TB_VIEW_MODE, 0, IDS_TBTT_VIEW_MODE, CM_ACTIVEVIEWMODE, CM_LEFTVIEWMODE, CM_RIGHTVIEWMODE, 0, 1, 0, NULL, NULL, NULL, "Views"},
-        /*TBBE_DETAILED*/ {0xFFFF, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL},
-        /*TBBE_SORT_NAME*/ {IDX_TB_SORTBYNAME, 0, IDS_TBTT_SORTBYNAME, CM_ACTIVENAME, CM_LEFTNAME, CM_RIGHTNAME, 0, 0, 1, NULL, NULL, NULL, "SortByName"},
-        /*TBBE_SORT_EXT*/ {IDX_TB_SORTBYEXT, 0, IDS_TBTT_SORTBYEXT, CM_ACTIVEEXT, CM_LEFTEXT, CM_RIGHTEXT, 0, 0, 1, NULL, NULL, NULL, "SortByExtension"},
-        /*TBBE_SORT_SIZE*/ {IDX_TB_SORTBYSIZE, 0, IDS_TBTT_SORTBYSIZE, CM_ACTIVESIZE, CM_LEFTSIZE, CM_RIGHTSIZE, 0, 0, 1, NULL, NULL, NULL, "SortBySize"},
-        /*TBBE_SORT_DATE*/ {IDX_TB_SORTBYDATE, 0, IDS_TBTT_SORTBYDATE, CM_ACTIVETIME, CM_LEFTTIME, CM_RIGHTTIME, 0, 0, 1, NULL, NULL, NULL, "SortByDate"},
-        /*TBBE_SORT_ATTR*/ {0xFFFF, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL},
-        /*TBBE_PARENT_DIR*/ {IDX_TB_PARENTDIR, 0, IDS_TBTT_PARENTDIR, CM_ACTIVEPARENTDIR, CM_LPARENTDIR, CM_RPARENTDIR, 0, 0, 0, &EnablerUpDir, &EnablerLeftUpDir, &EnablerRightUpDir, "ParentDirectory"},
-        /*TBBE_ROOT_DIR*/ {IDX_TB_ROOTDIR, 0, IDS_TBTT_ROOTDIR, CM_ACTIVEROOTDIR, CM_LROOTDIR, CM_RROOTDIR, 0, 0, 0, &EnablerRootDir, &EnablerLeftRootDir, &EnablerRightRootDir, "RootDirectory"},
-        /*TBBE_FILTER*/ {IDX_TB_FILTER, 0, IDS_TBTT_FILTER, CM_CHANGEFILTER, CM_LCHANGEFILTER, CM_RCHANGEFILTER, 0, 0, 0, NULL, NULL, NULL, "Filter"},
-        /*TBBE_BACK*/ {IDX_TB_BACK, 0, IDS_TBTT_BACK, CM_ACTIVEBACK, CM_LBACK, CM_RBACK, 1, 0, 0, &EnablerBackward, &EnablerLeftBackward, &EnablerRightBackward, "Back"},
-        /*TBBE_FORWARD*/ {IDX_TB_FORWARD, 0, IDS_TBTT_FORWARD, CM_ACTIVEFORWARD, CM_LFORWARD, CM_RFORWARD, 1, 0, 0, &EnablerForward, &EnablerLeftForward, &EnablerRightForward, "Forward"},
-        /*TBBE_REFRESH*/ {IDX_TB_REFRESH, 0, IDS_TBTT_REFRESH, CM_ACTIVEREFRESH, CM_LEFTREFRESH, CM_RIGHTREFRESH, 0, 0, 0, NULL, NULL, NULL, "Refresh"},
-        /*TBBE_SWAP_PANELS*/ {IDX_TB_SWAPPANELS, 0, IDS_TBTT_SWAPPANELS, CM_SWAPPANELS, 0, 0, 0, 0, 0, NULL, NULL, NULL, "SwapPanels"},
-        /*TBBE_PROPERTIES*/ {IDX_TB_PROPERTIES, 0, IDS_TBTT_PROPERTIES, CM_PROPERTIES, 0, 0, 0, 0, 0, &EnablerShowProperties, NULL, NULL, "Properties"},
-        /*TBBE_USER_MENU_DROP*/ {IDX_TB_USERMENU, 0, IDS_TBTT_USERMENU, CM_USERMENUDROP, 0, 0, 0, 1, 0, &EnablerOnDisk, NULL, NULL, "UserMenu"},
-        /*TBBE_CMD*/ {IDX_TB_COMMANDSHELL, 0, IDS_TBTT_COMMANDSHELL, CM_DOSSHELL, 0, 0, 0, 0, 0, NULL, NULL, NULL, "CommandShell"},
-        /*TBBE_COPY*/ {IDX_TB_COPY, 0, IDS_TBTT_COPY, CM_COPYFILES, 0, 0, 0, 0, 0, &EnablerFilesCopy, NULL, NULL, "Copy"},
-        /*TBBE_MOVE*/ {IDX_TB_MOVE, 0, IDS_TBTT_MOVE, CM_MOVEFILES, 0, 0, 0, 0, 0, &EnablerFilesMove, NULL, NULL, "Move"},
-        /*TBBE_DELETE*/ {IDX_TB_DELETE, 0, IDS_TBTT_DELETE, CM_DELETEFILES, 0, 0, 0, 0, 0, &EnablerFilesDelete, NULL, NULL, "Delete"},
-        /*TBBE_COMPRESS*/ {IDX_TB_COMPRESS, 0, IDS_TBTT_COMPRESS, CM_COMPRESS, 0, 0, 0, 0, 0, &EnablerFilesOnDiskCompress, NULL, NULL, "NTFSCompress"},
-        /*TBBE_UNCOMPRESS*/ {IDX_TB_UNCOMPRESS, 0, IDS_TBTT_UNCOMPRESS, CM_UNCOMPRESS, 0, 0, 0, 0, 0, &EnablerFilesOnDiskCompress, NULL, NULL, "NTFSUncompress"},
-        /*TBBE_QUICK_RENAME*/ {IDX_TB_QUICKRENAME, 0, IDS_TBTT_QUICKRENAME, CM_RENAMEFILE, 0, 0, 0, 0, 0, &EnablerQuickRename, NULL, NULL, "QuickRename"},
-        /*TBBE_CHANGE_CASE*/ {IDX_TB_CHANGECASE, 0, IDS_TBTT_CHANGECASE, CM_CHANGECASE, 0, 0, 0, 0, 0, &EnablerFilesOnDisk, NULL, NULL, "ChangeCase"},
-        /*TBBE_VIEW*/ {IDX_TB_VIEW, 0, IDS_TBTT_VIEW, CM_VIEW, 0, 0, 1, 0, 0, &EnablerViewFile, NULL, NULL, "View"},
-        /*TBBE_EDIT*/ {IDX_TB_EDIT, 0, IDS_TBTT_EDIT, CM_EDIT, 0, 0, 1, 0, 0, &EnablerFileOnDiskOrArchive, NULL, NULL, "Edit"},
-        /*TBBE_CLIPBOARD_CUT*/ {IDX_TB_CLIPBOARDCUT, 0, IDS_TBTT_CLIPBOARDCUT, CM_CLIPCUT, 0, 0, 0, 0, 0, &EnablerFilesOnDisk, NULL, NULL, "ClipboardCut"},
-        /*TBBE_CLIPBOARD_COPY*/ {IDX_TB_CLIPBOARDCOPY, 0, IDS_TBTT_CLIPBOARDCOPY, CM_CLIPCOPY, 0, 0, 0, 0, 0, &EnablerFilesOnDiskOrArchive, NULL, NULL, "ClipboardCopy"},
-        /*TBBE_CLIPBOARD_PASTE*/ {IDX_TB_CLIPBOARDPASTE, 0, IDS_TBTT_CLIPBOARDPASTE, CM_CLIPPASTE, 0, 0, 0, 0, 0, &EnablerPaste, NULL, NULL, "ClipboardPaste"},
-        /*TBBE_CHANGE_ATTR*/ {IDX_TB_CHANGEATTR, 0, IDS_TBTT_CHANGEATTR, CM_CHANGEATTR, 0, 0, 0, 0, 0, &EnablerChangeAttrs, NULL, NULL, "ChangeAttributes"},
-        /*TBBE_COMPARE_DIR*/ {IDX_TB_COMPAREDIR, 0, IDS_TBTT_COMPAREDIR, CM_COMPAREDIRS, 0, 0, 0, 0, 0, NULL, NULL, NULL, "CompareDirectories"},
-        /*TBBE_DRIVE_INFO*/ {IDX_TB_DRIVEINFO, 0, IDS_TBTT_DRIVEINFO, CM_DRIVEINFO, 0, 0, 0, 0, 0, &EnablerDriveInfo, NULL, NULL, "DriveInformation"},
-        /*TBBE_CHANGE_DRIVE_L*/ {IDX_TB_CHANGEDRIVEL, 255, IDS_TBTT_CHANGEDRIVE, CM_LCHANGEDRIVE, CM_LCHANGEDRIVE, 0, 0, 1, 0, NULL, NULL, NULL, NULL},
-        /*TBBE_SELECT*/ {IDX_TB_SELECT, 0, IDS_TBTT_SELECT, CM_ACTIVESELECT, 0, 0, 0, 0, 0, NULL, NULL, NULL, "Select"},
-        /*TBBE_UNSELECT*/ {IDX_TB_UNSELECT, 0, IDS_TBTT_UNSELECT, CM_ACTIVEUNSELECT, 0, 0, 0, 0, 0, &EnablerSelected, NULL, NULL, "Unselect"},
-        /*TBBE_INVERT_SEL*/ {IDX_TB_INVERTSEL, 0, IDS_TBTT_INVERTSEL, CM_ACTIVEINVERTSEL, 0, 0, 0, 0, 0, NULL, NULL, NULL, "InvertSelection"},
-        /*TBBE_SELECT_ALL*/ {IDX_TB_SELECTALL, 0, IDS_TBTT_SELECTALL, CM_ACTIVESELECTALL, 0, 0, 0, 0, 0, NULL, NULL, NULL, "SelectAll"},
-        /*TBBE_PACK*/ {IDX_TB_PACK, 0, IDS_TBTT_PACK, CM_PACK, 0, 0, 0, 0, 0, &EnablerFilesOnDisk, NULL, NULL, "Pack"},
-        /*TBBE_UNPACK*/ {IDX_TB_UNPACK, 0, IDS_TBTT_UNPACK, CM_UNPACK, 0, 0, 0, 0, 0, &EnablerFileOnDisk, NULL, NULL, "Unpack"},
-        /*TBBE_OPEN_ACTIVE*/ {NIB1(IDX_TB_OPENACTIVE), 5, IDS_TBTT_OPENACTIVE, CM_OPENACTUALFOLDER, 0, 0, 0, 0, 0, &EnablerOpenActiveFolder, NULL, NULL, NULL},
-        /*TBBE_OPEN_DESKTOP*/ {NIB1(IDX_TB_OPENDESKTOP), 35, IDS_TBTT_OPENDESKTOP, CM_OPENDESKTOP, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL},
-        /*TBBE_OPEN_MYCOMP*/ {NIB1(IDX_TB_OPENMYCOMP), 16, IDS_TBTT_OPENMYCOMP, CM_OPENMYCOMP, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL},
-        /*TBBE_OPEN_CONTROL*/ {NIB1(IDX_TB_OPENCONTROL), 137, IDS_TBTT_OPENCONTROL, CM_OPENCONROLPANEL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL},
-        /*TBBE_OPEN_PRINTERS*/ {NIB1(IDX_TB_OPENPRINTERS), 138, IDS_TBTT_OPENPRINTERS, CM_OPENPRINTERS, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL},
-        /*TBBE_OPEN_NETWORK*/ {NIB1(IDX_TB_OPENNETWORK), 18, IDS_TBTT_OPENNETWORK, CM_OPENNETNEIGHBOR, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL},
-        /*TBBE_OPEN_RECYCLE*/ {NIB1(IDX_TB_OPENRECYCLE), 33, IDS_TBTT_OPENRECYCLE, CM_OPENRECYCLEBIN, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL},
-        /*TBBE_OPEN_FONTS*/ {NIB1(IDX_TB_OPENFONTS), 39, IDS_TBTT_OPENFONTS, CM_OPENFONTS, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL},
-        /*TBBE_CHANGE_DRIVE_R*/ {IDX_TB_CHANGEDRIVER, 255, IDS_TBTT_CHANGEDRIVE, CM_RCHANGEDRIVE, 0, CM_RCHANGEDRIVE, 0, 1, 0, NULL, NULL, NULL, NULL},
-        /*TBBE_HELP_CONTENTS*/ {NIB1(IDX_TB_HELP), 0, IDS_TBTT_HELP, CM_HELP_CONTENTS, 0, 0, 0, 0, 0, NULL, NULL, NULL, "HelpContents"},
-        /*TBBE_HELP_CONTEXT*/ {NIB1(IDX_TB_CONTEXTHELP), 0, IDS_TBTT_CONTEXTHELP, CM_HELP_CONTEXT, 0, 0, 0, 0, 0, NULL, NULL, NULL, "WhatIsThis"},
-        /*TBBE_PERMISSIONS*/ {IDX_TB_PERMISSIONS, 0, IDS_TBTT_PERMISSIONS, CM_SEC_PERMISSIONS, 0, 0, 0, 0, 0, &EnablerPermissions, NULL, NULL, "Security"},
-        /*TBBE_CONVERT*/ {IDX_TB_CONVERT, 0, IDS_TBTT_CONVERT, CM_CONVERTFILES, 0, 0, 0, 0, 0, &EnablerFilesOnDisk, NULL, NULL, "Convert"},
-        /*TBBE_UNSELECT_ALL*/ {IDX_TB_UNSELECTALL, 0, IDS_TBTT_UNSELECTALL, CM_ACTIVEUNSELECTALL, 0, 0, 0, 0, 0, &EnablerSelected, NULL, NULL, "UnselectAll"},
-        /*TBBE_MENU*/ {0xFFFF, 0, IDS_TBTT_MENU, CM_MENU, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL},
-        /*TBBE_ALTVIEW*/ {0xFFFF, 0, IDS_TBTT_ALTVIEW, CM_ALTVIEW, 0, 0, 0, 0, 0, &EnablerViewFile, NULL, NULL, NULL},
-        /*TBBE_EXIT*/ {0xFFFF, 0, IDS_TBTT_EXIT, CM_EXIT, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL},
-        /*TBBE_OCCUPIEDSPACE*/ {IDX_TB_OCCUPIEDSPACE, 0, IDS_TBTT_OCCUPIEDSPACE, CM_OCCUPIEDSPACE, 0, 0, 0, 0, 0, &EnablerOccupiedSpace, NULL, NULL, "CalculateOccupiedSpace"},
-        /*TBBE_EDITNEW*/ {IDX_TB_EDITNEW, 0, IDS_TBTT_EDITNEW, CM_EDITNEW, 0, 0, 0, 0, 0, &EnablerOnDisk, NULL, NULL, "EditNewFile"},
-        /*TBBE_CHANGEDIR*/ {IDX_TB_CHANGE_DIR, 0, IDS_TBTT_CHANGEDIR, CM_ACTIVE_CHANGEDIR, CM_LEFT_CHANGEDIR, CM_RIGHT_CHANGEDIR, 0, 0, 0, NULL, NULL, NULL, "ChangeDirectory"},
-        /*TBBE_HOTPATHS*/ {0xFFFF, 0, IDS_TBTT_HOTPATHS, CM_OPENHOTPATHS, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL},
-        /*TBBE_CONTEXTMENU*/ {0xFFFF, 0, IDS_TBTT_CONTEXTMENU, CM_CONTEXTMENU, 0, 0, 0, 0, 0, &EnablerItemsContextMenu, NULL, NULL, NULL},
-        /*TBBE_VIEWWITH*/ {0xFFFF, 0, IDS_TBTT_VIEWWITH, CM_VIEW_WITH, 0, 0, 0, 0, 0, &EnablerViewFile, NULL, NULL, NULL},
-        /*TBBE_EDITWITH*/ {0xFFFF, 0, IDS_TBTT_EDITWITH, CM_EDIT_WITH, 0, 0, 0, 0, 0, &EnablerFileOnDiskOrArchive, NULL, NULL, NULL},
-        /*TBBE_CALCDIRSIZES*/ {IDX_TB_CALCDIRSIZES, 0, IDS_TBTT_CALCDIRSIZES, CM_CALCDIRSIZES, 0, 0, 0, 0, 0, &EnablerCalcDirSizes, NULL, NULL, "CalculateDirectorySizes"},
-        /*TBBE_FILEHISTORY*/ {0xFFFF, 0, IDS_TBTT_FILEHISTORY, CM_FILEHISTORY, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL},
-        /*TBBE_DIRHISTORY*/ {0xFFFF, 0, IDS_TBTT_DIRHISTORY, CM_DIRHISTORY, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL},
-        /*TBBE_HOTPATHSDROP*/ {IDX_TB_HOTPATHS, 0, IDS_TBTT_HOTPATHSDROP, CM_OPENHOTPATHSDROP, 0, 0, 0, 1, 0, NULL, NULL, NULL, "GoToHotPath"},
-        /*TBBE_USER_MENU*/ {IDX_TB_USERMENU, 0, IDS_TBTT_USERMENU, CM_USERMENU, 0, 0, 0, 0, 0, &EnablerOnDisk, NULL, NULL, "UserMenu"},
-        /*TBBE_EMAIL*/ {IDX_TB_EMAIL, 0, IDS_TBTT_EMAIL, CM_EMAILFILES, 0, 0, 0, 0, 0, &EnablerFilesOnDisk, NULL, NULL, "Email"},
-        /*TBBE_ZOOM_PANEL*/ {0xFFFF, 0, IDS_TBTT_ZOOMPANEL, CM_ACTIVEZOOMPANEL, 0, 0, 0, 0, 0, NULL, NULL, NULL, "SharedDirectories"},
-        /*TBBE_SHARES*/ {IDX_TB_SHARED_DIRS, 0, IDS_TBTT_SHARES, CM_SHARES, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL},
-        /*TBBE_FULLSCREEN*/ {0xFFFF, 0, IDS_TBTT_FULLSCREEN, CM_FULLSCREEN, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL},
-        /*TBBE_PREV_SELECTED*/ {IDX_TB_PREV_SELECTED, 0, IDS_TBTT_PREV_SEL, CM_GOTO_PREV_SEL, 0, 0, 0, 0, 0, &EnablerSelGotoPrev, NULL, NULL, "GoToPreviousSelectedName"},
-        /*TBBE_NEXT_SELECTED*/ {IDX_TB_NEXT_SELECTED, 0, IDS_TBTT_NEXT_SEL, CM_GOTO_NEXT_SEL, 0, 0, 0, 0, 0, &EnablerSelGotoNext, NULL, NULL, "GoToNextSelectedName"},
-        /*TBBE_RESELECT*/ {IDX_TB_RESELECT, 0, IDS_TBTT_RESELECT, CM_RESELECT, 0, 0, 0, 0, 0, &EnablerSelectionStored, NULL, NULL, "RestoreSelection"},
-        /*TBBE_PASTESHORTCUT*/ {IDX_TB_PASTESHORTCUT, 0, IDS_TBTT_PASTESHORTCUT, CM_CLIPPASTELINKS, 0, 0, 0, 0, 0, &EnablerPasteLinksOnDisk, NULL, NULL, "PasteShortcut"},
-        /*TBBE_FOCUSSHORTCUT*/ {IDX_TB_FOCUSSHORTCUT, 0, IDS_TBTT_FOCUSSHORTCUT, CM_AFOCUSSHORTCUT, 0, 0, 0, 0, 0, &EnablerFileOrDirLinkOnDisk, NULL, NULL, "GoToShortcutTarget"},
-        /*TBBE_SAVESELECTION*/ {IDX_TB_SAVESELECTION, 0, IDS_TBTT_SAVESELECTION, CM_STORESEL, 0, 0, 0, 0, 0, &EnablerSelected, NULL, NULL, "SaveSelection"},
-        /*TBBE_LOADSELECTION*/ {IDX_TB_LOADSELECTION, 0, IDS_TBTT_LOADSELECTION, CM_RESTORESEL, 0, 0, 0, 0, 0, &EnablerGlobalSelStored, NULL, NULL, "LoadSelection"},
-        /*TBBE_NEW*/ {IDX_TB_NEW, 0, IDS_TBTT_NEW, CM_NEWDROP, 0, 0, 0, 1, 0, &EnablerOnDisk, NULL, NULL, "New"},
-        /*TBBE_SEL_BY_EXT*/ {IDX_TB_SEL_BY_EXT, 0, IDS_TBTT_SEL_BY_EXT, CM_SELECTBYFOCUSEDEXT, 0, 0, 0, 0, 0, &EnablerFileDir, NULL, NULL, "SelectFilesWithSameExtension"},
-        /*TBBE_UNSEL_BY_EXT*/ {IDX_TB_UNSEL_BY_EXT, 0, IDS_TBTT_UNSEL_BY_EXT, CM_UNSELECTBYFOCUSEDEXT, 0, 0, 0, 0, 0, &EnablerFileDirANDSelected, NULL, NULL, "UnselectFilesWithSameExtension"},
-        /*TBBE_SEL_BY_NAME*/ {IDX_TB_SEL_BY_NAME, 0, IDS_TBTT_SEL_BY_NAME, CM_SELECTBYFOCUSEDNAME, 0, 0, 0, 0, 0, &EnablerFileDir, NULL, NULL, "SelectFilesWithSameName"},
-        /*TBBE_UNSEL_BY_NAME*/ {IDX_TB_UNSEL_BY_NAME, 0, IDS_TBTT_UNSEL_BY_NAME, CM_UNSELECTBYFOCUSEDNAME, 0, 0, 0, 0, 0, &EnablerFileDirANDSelected, NULL, NULL, "UnselectFilesWithSameName"},
-        /*TBBE_OPEN_FOLDER*/ {NIB1(IDX_TB_OPEN_FOLDER), 0, IDS_TBTT_OPEN_FOLDER, CM_OPEN_FOLDER_DROP, 0, 0, 0, 1, 0, NULL, NULL, NULL, "OpenFolder"},
-        /*TBBE_CONFIGRATION*/ {IDX_TB_CONFIGURARTION, 0, IDS_TBTT_CONFIGURATION, CM_CONFIGURATION, 0, 0, 0, 0, 0, NULL, NULL, NULL, "Configuration"},
-        /*TBBE_DIRMENU*/ {0xFFFF, 0, IDS_TBTT_DIRMENU, CM_DIRMENU, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL},
-        /*TBBE_OPEN_IN_OTHER_ACT*/ {IDX_TB_OPEN_IN_OTHER_ACT, 0, IDS_TBTT_OPENINOTHER_A, CM_OPEN_IN_OTHER_PANEL_ACT, 0, 0, 0, 0, 0, NULL, NULL, NULL, "FocusNameInOtherPanel"},
-        /*TBBE_OPEN_IN_OTHER*/ {IDX_TB_OPEN_IN_OTHER, 0, IDS_TBTT_OPENINOTHER, CM_OPEN_IN_OTHER_PANEL, 0, 0, 0, 0, 0, NULL, NULL, NULL, "OpenNameInOtherPanel"},
-        /*TBBE_AS_OTHER_PANEL*/ {IDX_TB_AS_OTHER_PANEL, 0, IDS_TBTT_ASOTHERPANEL, CM_ACTIVE_AS_OTHER, CM_LEFT_AS_OTHER, CM_RIGHT_AS_OTHER, 0, 0, 0, NULL, NULL, NULL, "GoToPathFromOtherPanel"},
-        /*TBBE_HIDE_SELECTED*/ {IDX_TB_HIDE_SELECTED, 0, IDS_TBTT_HIDE_SELECTED, CM_HIDE_SELECTED_NAMES, 0, 0, 0, 0, 0, &EnablerSelected, NULL, NULL, "HideSelectedNames"},
-        /*TBBE_HIDE_UNSELECTED*/ {IDX_TB_HIDE_UNSELECTED, 0, IDS_TBTT_HIDE_UNSELECTED, CM_HIDE_UNSELECTED_NAMES, 0, 0, 0, 0, 0, &EnablerUnselected, NULL, NULL, "HideUnselectedNames"},
-        /*TBBE_SHOW_ALL*/ {IDX_TB_SHOW_ALL, 0, IDS_TBTT_SHOW_ALL, CM_SHOW_ALL_NAME, 0, 0, 0, 0, 0, &EnablerHiddenNames, NULL, NULL, "ShowHiddenNames"},
-        /*TBBE_OPEN_MYDOC*/ {NIB1(IDX_TB_OPENMYDOC), 21, IDS_TBTT_OPENMYDOC, CM_OPENPERSONAL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL},
-        /*TBBE_SMART_COLUMN_MODE*/ {IDX_TB_SMART_COLUMN_MODE, 0, IDS_TBTT_SMARTMODE, CM_ACTIVE_SMARTMODE, CM_LEFT_SMARTMODE, CM_RIGHT_SMARTMODE, 0, 0, 0, NULL, NULL, NULL, "SmartColumnMode"},
+        //                    ImageIndex, Shell32ResID, ToolTipResID, ID, LeftID, RightID, DropDown, WD, Chk, Enabler, LeftEnabler, RightEnabler, SVGName, BottomLeftID, BottomRightID, BottomLeftEnabler, BottomRightEnabler,
+        /*TBBE_CONNECT_NET*/ {NIB1(IDX_TB_CONNECTNET), 0, IDS_TBTT_CONNECTNET, CM_CONNECTNET, 0, 0, 0, 0, 0, NULL, NULL, NULL, "ConnectNetworkDrive", 0, 0, NULL, NULL},
+        /*TBBE_DISCONNECT_NET*/ {IDX_TB_DISCONNECTNET, 0, IDS_TBTT_DISCONNECTNET, CM_DISCONNECTNET, 0, 0, 0, 0, 0, NULL, NULL, NULL, "Disconnect", 0, 0, NULL, NULL},
+        /*TBBE_CREATE_DIR*/ {IDX_TB_CREATEDIR, 0, IDS_TBTT_CREATEDIR, CM_CREATEDIR, 0, 0, 0, 0, 0, &EnablerCreateDir, NULL, NULL, "CreateDirectory", 0, 0, NULL, NULL},
+        /*TBBE_FIND_FILE*/ {IDX_TB_FINDFILE, 0, IDS_TBTT_FINDFILE, CM_FINDFILE, 0, 0, 0, 0, 0, NULL, NULL, NULL, "FindFilesAndDirectories", 0, 0, NULL, NULL},
+        /*TBBE_VIEW_MODE*/ {IDX_TB_VIEW_MODE, 0, IDS_TBTT_VIEW_MODE, CM_ACTIVEVIEWMODE, CM_LEFTVIEWMODE, CM_RIGHTVIEWMODE, 0, 1, 0, NULL, NULL, NULL, "Views", CM_BOTTOMLEFTVIEWMODE, CM_BOTTOMRIGHTVIEWMODE, NULL, NULL},
+        /*TBBE_DETAILED*/ {0xFFFF, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL},
+        /*TBBE_SORT_NAME*/ {IDX_TB_SORTBYNAME, 0, IDS_TBTT_SORTBYNAME, CM_ACTIVENAME, CM_LEFTNAME, CM_RIGHTNAME, 0, 0, 1, NULL, NULL, NULL, "SortByName", CM_BOTTOMLEFTNAME, CM_BOTTOMRIGHTNAME, NULL, NULL},
+        /*TBBE_SORT_EXT*/ {IDX_TB_SORTBYEXT, 0, IDS_TBTT_SORTBYEXT, CM_ACTIVEEXT, CM_LEFTEXT, CM_RIGHTEXT, 0, 0, 1, NULL, NULL, NULL, "SortByExtension", CM_BOTTOMLEFTEXT, CM_BOTTOMRIGHTEXT, NULL, NULL},
+        /*TBBE_SORT_SIZE*/ {IDX_TB_SORTBYSIZE, 0, IDS_TBTT_SORTBYSIZE, CM_ACTIVESIZE, CM_LEFTSIZE, CM_RIGHTSIZE, 0, 0, 1, NULL, NULL, NULL, "SortBySize", CM_BOTTOMLEFTSIZE, CM_BOTTOMRIGHTSIZE, NULL, NULL},
+        /*TBBE_SORT_DATE*/ {IDX_TB_SORTBYDATE, 0, IDS_TBTT_SORTBYDATE, CM_ACTIVETIME, CM_LEFTTIME, CM_RIGHTTIME, 0, 0, 1, NULL, NULL, NULL, "SortByDate", CM_BOTTOMLEFTTIME, CM_BOTTOMRIGHTTIME, NULL, NULL},
+        /*TBBE_SORT_ATTR*/ {0xFFFF, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL},
+        /*TBBE_PARENT_DIR*/ {IDX_TB_PARENTDIR, 0, IDS_TBTT_PARENTDIR, CM_ACTIVEPARENTDIR, CM_LPARENTDIR, CM_RPARENTDIR, 0, 0, 0, &EnablerUpDir, &EnablerLeftUpDir, &EnablerRightUpDir, "ParentDirectory", CM_BLPARENTDIR, CM_BRPARENTDIR, &EnablerBottomLeftUpDir, &EnablerBottomRightUpDir},
+        /*TBBE_ROOT_DIR*/ {IDX_TB_ROOTDIR, 0, IDS_TBTT_ROOTDIR, CM_ACTIVEROOTDIR, CM_LROOTDIR, CM_RROOTDIR, 0, 0, 0, &EnablerRootDir, &EnablerLeftRootDir, &EnablerRightRootDir, "RootDirectory", CM_BLROOTDIR, CM_BRROOTDIR, &EnablerBottomLeftRootDir, &EnablerBottomRightRootDir},
+        /*TBBE_FILTER*/ {IDX_TB_FILTER, 0, IDS_TBTT_FILTER, CM_CHANGEFILTER, CM_LCHANGEFILTER, CM_RCHANGEFILTER, 0, 0, 0, NULL, NULL, NULL, "Filter", CM_BLCHANGEFILTER, CM_BRCHANGEFILTER, NULL, NULL},
+        /*TBBE_BACK*/ {IDX_TB_BACK, 0, IDS_TBTT_BACK, CM_ACTIVEBACK, CM_LBACK, CM_RBACK, 1, 0, 0, &EnablerBackward, &EnablerLeftBackward, &EnablerRightBackward, "Back", CM_BLBACK, CM_BRBACK, &EnablerBottomLeftBackward, &EnablerBottomRightBackward},
+        /*TBBE_FORWARD*/ {IDX_TB_FORWARD, 0, IDS_TBTT_FORWARD, CM_ACTIVEFORWARD, CM_LFORWARD, CM_RFORWARD, 1, 0, 0, &EnablerForward, &EnablerLeftForward, &EnablerRightForward, "Forward", CM_BLFORWARD, CM_BRFORWARD, &EnablerBottomLeftForward, &EnablerBottomRightForward},
+        /*TBBE_REFRESH*/ {IDX_TB_REFRESH, 0, IDS_TBTT_REFRESH, CM_ACTIVEREFRESH, CM_LEFTREFRESH, CM_RIGHTREFRESH, 0, 0, 0, NULL, NULL, NULL, "Refresh", CM_BOTTOMLEFTREFRESH, CM_BOTTOMRIGHTREFRESH, NULL, NULL},
+        /*TBBE_SWAP_PANELS*/ {IDX_TB_SWAPPANELS, 0, IDS_TBTT_SWAPPANELS, CM_SWAPPANELS, 0, 0, 0, 0, 0, NULL, NULL, NULL, "SwapPanels", 0, 0, NULL, NULL},
+        /*TBBE_PROPERTIES*/ {IDX_TB_PROPERTIES, 0, IDS_TBTT_PROPERTIES, CM_PROPERTIES, 0, 0, 0, 0, 0, &EnablerShowProperties, NULL, NULL, "Properties", 0, 0, NULL, NULL},
+        /*TBBE_USER_MENU_DROP*/ {IDX_TB_USERMENU, 0, IDS_TBTT_USERMENU, CM_USERMENUDROP, 0, 0, 0, 1, 0, &EnablerOnDisk, NULL, NULL, "UserMenu", 0, 0, NULL, NULL},
+        /*TBBE_CMD*/ {IDX_TB_COMMANDSHELL, 0, IDS_TBTT_COMMANDSHELL, CM_DOSSHELL, 0, 0, 0, 0, 0, NULL, NULL, NULL, "CommandShell", 0, 0, NULL, NULL},
+        /*TBBE_COPY*/ {IDX_TB_COPY, 0, IDS_TBTT_COPY, CM_COPYFILES, 0, 0, 0, 0, 0, &EnablerFilesCopy, NULL, NULL, "Copy", 0, 0, NULL, NULL},
+        /*TBBE_MOVE*/ {IDX_TB_MOVE, 0, IDS_TBTT_MOVE, CM_MOVEFILES, 0, 0, 0, 0, 0, &EnablerFilesMove, NULL, NULL, "Move", 0, 0, NULL, NULL},
+        /*TBBE_DELETE*/ {IDX_TB_DELETE, 0, IDS_TBTT_DELETE, CM_DELETEFILES, 0, 0, 0, 0, 0, &EnablerFilesDelete, NULL, NULL, "Delete", 0, 0, NULL, NULL},
+        /*TBBE_COMPRESS*/ {IDX_TB_COMPRESS, 0, IDS_TBTT_COMPRESS, CM_COMPRESS, 0, 0, 0, 0, 0, &EnablerFilesOnDiskCompress, NULL, NULL, "NTFSCompress", 0, 0, NULL, NULL},
+        /*TBBE_UNCOMPRESS*/ {IDX_TB_UNCOMPRESS, 0, IDS_TBTT_UNCOMPRESS, CM_UNCOMPRESS, 0, 0, 0, 0, 0, &EnablerFilesOnDiskCompress, NULL, NULL, "NTFSUncompress", 0, 0, NULL, NULL},
+        /*TBBE_QUICK_RENAME*/ {IDX_TB_QUICKRENAME, 0, IDS_TBTT_QUICKRENAME, CM_RENAMEFILE, 0, 0, 0, 0, 0, &EnablerQuickRename, NULL, NULL, "QuickRename", 0, 0, NULL, NULL},
+        /*TBBE_CHANGE_CASE*/ {IDX_TB_CHANGECASE, 0, IDS_TBTT_CHANGECASE, CM_CHANGECASE, 0, 0, 0, 0, 0, &EnablerFilesOnDisk, NULL, NULL, "ChangeCase", 0, 0, NULL, NULL},
+        /*TBBE_VIEW*/ {IDX_TB_VIEW, 0, IDS_TBTT_VIEW, CM_VIEW, 0, 0, 1, 0, 0, &EnablerViewFile, NULL, NULL, "View", 0, 0, NULL, NULL},
+        /*TBBE_EDIT*/ {IDX_TB_EDIT, 0, IDS_TBTT_EDIT, CM_EDIT, 0, 0, 1, 0, 0, &EnablerFileOnDiskOrArchive, NULL, NULL, "Edit", 0, 0, NULL, NULL},
+        /*TBBE_CLIPBOARD_CUT*/ {IDX_TB_CLIPBOARDCUT, 0, IDS_TBTT_CLIPBOARDCUT, CM_CLIPCUT, 0, 0, 0, 0, 0, &EnablerFilesOnDisk, NULL, NULL, "ClipboardCut", 0, 0, NULL, NULL},
+        /*TBBE_CLIPBOARD_COPY*/ {IDX_TB_CLIPBOARDCOPY, 0, IDS_TBTT_CLIPBOARDCOPY, CM_CLIPCOPY, 0, 0, 0, 0, 0, &EnablerFilesOnDiskOrArchive, NULL, NULL, "ClipboardCopy", 0, 0, NULL, NULL},
+        /*TBBE_CLIPBOARD_PASTE*/ {IDX_TB_CLIPBOARDPASTE, 0, IDS_TBTT_CLIPBOARDPASTE, CM_CLIPPASTE, 0, 0, 0, 0, 0, &EnablerPaste, NULL, NULL, "ClipboardPaste", 0, 0, NULL, NULL},
+        /*TBBE_CHANGE_ATTR*/ {IDX_TB_CHANGEATTR, 0, IDS_TBTT_CHANGEATTR, CM_CHANGEATTR, 0, 0, 0, 0, 0, &EnablerChangeAttrs, NULL, NULL, "ChangeAttributes", 0, 0, NULL, NULL},
+        /*TBBE_COMPARE_DIR*/ {IDX_TB_COMPAREDIR, 0, IDS_TBTT_COMPAREDIR, CM_COMPAREDIRS, 0, 0, 0, 0, 0, NULL, NULL, NULL, "CompareDirectories", 0, 0, NULL, NULL},
+        /*TBBE_DRIVE_INFO*/ {IDX_TB_DRIVEINFO, 0, IDS_TBTT_DRIVEINFO, CM_DRIVEINFO, 0, 0, 0, 0, 0, &EnablerDriveInfo, NULL, NULL, "DriveInformation", 0, 0, NULL, NULL},
+        /*TBBE_CHANGE_DRIVE_L*/ {IDX_TB_CHANGEDRIVEL, 255, IDS_TBTT_CHANGEDRIVE, CM_LCHANGEDRIVE, CM_LCHANGEDRIVE, 0, 0, 1, 0, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL},
+        /*TBBE_SELECT*/ {IDX_TB_SELECT, 0, IDS_TBTT_SELECT, CM_ACTIVESELECT, 0, 0, 0, 0, 0, NULL, NULL, NULL, "Select", 0, 0, NULL, NULL},
+        /*TBBE_UNSELECT*/ {IDX_TB_UNSELECT, 0, IDS_TBTT_UNSELECT, CM_ACTIVEUNSELECT, 0, 0, 0, 0, 0, &EnablerSelected, NULL, NULL, "Unselect", 0, 0, NULL, NULL},
+        /*TBBE_INVERT_SEL*/ {IDX_TB_INVERTSEL, 0, IDS_TBTT_INVERTSEL, CM_ACTIVEINVERTSEL, 0, 0, 0, 0, 0, NULL, NULL, NULL, "InvertSelection", 0, 0, NULL, NULL},
+        /*TBBE_SELECT_ALL*/ {IDX_TB_SELECTALL, 0, IDS_TBTT_SELECTALL, CM_ACTIVESELECTALL, 0, 0, 0, 0, 0, NULL, NULL, NULL, "SelectAll", 0, 0, NULL, NULL},
+        /*TBBE_PACK*/ {IDX_TB_PACK, 0, IDS_TBTT_PACK, CM_PACK, 0, 0, 0, 0, 0, &EnablerFilesOnDisk, NULL, NULL, "Pack", 0, 0, NULL, NULL},
+        /*TBBE_UNPACK*/ {IDX_TB_UNPACK, 0, IDS_TBTT_UNPACK, CM_UNPACK, 0, 0, 0, 0, 0, &EnablerFileOnDisk, NULL, NULL, "Unpack", 0, 0, NULL, NULL},
+        /*TBBE_OPEN_ACTIVE*/ {NIB1(IDX_TB_OPENACTIVE), 5, IDS_TBTT_OPENACTIVE, CM_OPENACTUALFOLDER, 0, 0, 0, 0, 0, &EnablerOpenActiveFolder, NULL, NULL, NULL, 0, 0, NULL, NULL},
+        /*TBBE_OPEN_DESKTOP*/ {NIB1(IDX_TB_OPENDESKTOP), 35, IDS_TBTT_OPENDESKTOP, CM_OPENDESKTOP, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL},
+        /*TBBE_OPEN_MYCOMP*/ {NIB1(IDX_TB_OPENMYCOMP), 16, IDS_TBTT_OPENMYCOMP, CM_OPENMYCOMP, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL},
+        /*TBBE_OPEN_CONTROL*/ {NIB1(IDX_TB_OPENCONTROL), 137, IDS_TBTT_OPENCONTROL, CM_OPENCONROLPANEL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL},
+        /*TBBE_OPEN_PRINTERS*/ {NIB1(IDX_TB_OPENPRINTERS), 138, IDS_TBTT_OPENPRINTERS, CM_OPENPRINTERS, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL},
+        /*TBBE_OPEN_NETWORK*/ {NIB1(IDX_TB_OPENNETWORK), 18, IDS_TBTT_OPENNETWORK, CM_OPENNETNEIGHBOR, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL},
+        /*TBBE_OPEN_RECYCLE*/ {NIB1(IDX_TB_OPENRECYCLE), 33, IDS_TBTT_OPENRECYCLE, CM_OPENRECYCLEBIN, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL},
+        /*TBBE_OPEN_FONTS*/ {NIB1(IDX_TB_OPENFONTS), 39, IDS_TBTT_OPENFONTS, CM_OPENFONTS, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL},
+        /*TBBE_CHANGE_DRIVE_R*/ {IDX_TB_CHANGEDRIVER, 255, IDS_TBTT_CHANGEDRIVE, CM_RCHANGEDRIVE, 0, CM_RCHANGEDRIVE, 0, 1, 0, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL},
+        /*TBBE_HELP_CONTENTS*/ {NIB1(IDX_TB_HELP), 0, IDS_TBTT_HELP, CM_HELP_CONTENTS, 0, 0, 0, 0, 0, NULL, NULL, NULL, "HelpContents", 0, 0, NULL, NULL},
+        /*TBBE_HELP_CONTEXT*/ {NIB1(IDX_TB_CONTEXTHELP), 0, IDS_TBTT_CONTEXTHELP, CM_HELP_CONTEXT, 0, 0, 0, 0, 0, NULL, NULL, NULL, "WhatIsThis", 0, 0, NULL, NULL},
+        /*TBBE_PERMISSIONS*/ {IDX_TB_PERMISSIONS, 0, IDS_TBTT_PERMISSIONS, CM_SEC_PERMISSIONS, 0, 0, 0, 0, 0, &EnablerPermissions, NULL, NULL, "Security", 0, 0, NULL, NULL},
+        /*TBBE_CONVERT*/ {IDX_TB_CONVERT, 0, IDS_TBTT_CONVERT, CM_CONVERTFILES, 0, 0, 0, 0, 0, &EnablerFilesOnDisk, NULL, NULL, "Convert", 0, 0, NULL, NULL},
+        /*TBBE_UNSELECT_ALL*/ {IDX_TB_UNSELECTALL, 0, IDS_TBTT_UNSELECTALL, CM_ACTIVEUNSELECTALL, 0, 0, 0, 0, 0, &EnablerSelected, NULL, NULL, "UnselectAll", 0, 0, NULL, NULL},
+        /*TBBE_MENU*/ {0xFFFF, 0, IDS_TBTT_MENU, CM_MENU, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL},
+        /*TBBE_ALTVIEW*/ {0xFFFF, 0, IDS_TBTT_ALTVIEW, CM_ALTVIEW, 0, 0, 0, 0, 0, &EnablerViewFile, NULL, NULL, NULL, 0, 0, NULL, NULL},
+        /*TBBE_EXIT*/ {0xFFFF, 0, IDS_TBTT_EXIT, CM_EXIT, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL},
+        /*TBBE_OCCUPIEDSPACE*/ {IDX_TB_OCCUPIEDSPACE, 0, IDS_TBTT_OCCUPIEDSPACE, CM_OCCUPIEDSPACE, 0, 0, 0, 0, 0, &EnablerOccupiedSpace, NULL, NULL, "CalculateOccupiedSpace", 0, 0, NULL, NULL},
+        /*TBBE_EDITNEW*/ {IDX_TB_EDITNEW, 0, IDS_TBTT_EDITNEW, CM_EDITNEW, 0, 0, 0, 0, 0, &EnablerOnDisk, NULL, NULL, "EditNewFile", 0, 0, NULL, NULL},
+        /*TBBE_CHANGEDIR*/ {IDX_TB_CHANGE_DIR, 0, IDS_TBTT_CHANGEDIR, CM_ACTIVE_CHANGEDIR, CM_LEFT_CHANGEDIR, CM_RIGHT_CHANGEDIR, 0, 0, 0, NULL, NULL, NULL, "ChangeDirectory", 0, 0, NULL, NULL},
+        /*TBBE_HOTPATHS*/ {0xFFFF, 0, IDS_TBTT_HOTPATHS, CM_OPENHOTPATHS, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL},
+        /*TBBE_CONTEXTMENU*/ {0xFFFF, 0, IDS_TBTT_CONTEXTMENU, CM_CONTEXTMENU, 0, 0, 0, 0, 0, &EnablerItemsContextMenu, NULL, NULL, NULL, 0, 0, NULL, NULL},
+        /*TBBE_VIEWWITH*/ {0xFFFF, 0, IDS_TBTT_VIEWWITH, CM_VIEW_WITH, 0, 0, 0, 0, 0, &EnablerViewFile, NULL, NULL, NULL, 0, 0, NULL, NULL},
+        /*TBBE_EDITWITH*/ {0xFFFF, 0, IDS_TBTT_EDITWITH, CM_EDIT_WITH, 0, 0, 0, 0, 0, &EnablerFileOnDiskOrArchive, NULL, NULL, NULL, 0, 0, NULL, NULL},
+        /*TBBE_CALCDIRSIZES*/ {IDX_TB_CALCDIRSIZES, 0, IDS_TBTT_CALCDIRSIZES, CM_CALCDIRSIZES, 0, 0, 0, 0, 0, &EnablerCalcDirSizes, NULL, NULL, "CalculateDirectorySizes", 0, 0, NULL, NULL},
+        /*TBBE_FILEHISTORY*/ {0xFFFF, 0, IDS_TBTT_FILEHISTORY, CM_FILEHISTORY, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL},
+        /*TBBE_DIRHISTORY*/ {0xFFFF, 0, IDS_TBTT_DIRHISTORY, CM_DIRHISTORY, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL},
+        /*TBBE_HOTPATHSDROP*/ {IDX_TB_HOTPATHS, 0, IDS_TBTT_HOTPATHSDROP, CM_OPENHOTPATHSDROP, 0, 0, 0, 1, 0, NULL, NULL, NULL, "GoToHotPath", 0, 0, NULL, NULL},
+        /*TBBE_USER_MENU*/ {IDX_TB_USERMENU, 0, IDS_TBTT_USERMENU, CM_USERMENU, 0, 0, 0, 0, 0, &EnablerOnDisk, NULL, NULL, "UserMenu", 0, 0, NULL, NULL},
+        /*TBBE_EMAIL*/ {IDX_TB_EMAIL, 0, IDS_TBTT_EMAIL, CM_EMAILFILES, 0, 0, 0, 0, 0, &EnablerFilesOnDisk, NULL, NULL, "Email", 0, 0, NULL, NULL},
+        /*TBBE_ZOOM_PANEL*/ {0xFFFF, 0, IDS_TBTT_ZOOMPANEL, CM_ACTIVEZOOMPANEL, 0, 0, 0, 0, 0, NULL, NULL, NULL, "SharedDirectories", 0, 0, NULL, NULL},
+        /*TBBE_SHARES*/ {IDX_TB_SHARED_DIRS, 0, IDS_TBTT_SHARES, CM_SHARES, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL},
+        /*TBBE_FULLSCREEN*/ {0xFFFF, 0, IDS_TBTT_FULLSCREEN, CM_FULLSCREEN, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL},
+        /*TBBE_PREV_SELECTED*/ {IDX_TB_PREV_SELECTED, 0, IDS_TBTT_PREV_SEL, CM_GOTO_PREV_SEL, 0, 0, 0, 0, 0, &EnablerSelGotoPrev, NULL, NULL, "GoToPreviousSelectedName", 0, 0, NULL, NULL},
+        /*TBBE_NEXT_SELECTED*/ {IDX_TB_NEXT_SELECTED, 0, IDS_TBTT_NEXT_SEL, CM_GOTO_NEXT_SEL, 0, 0, 0, 0, 0, &EnablerSelGotoNext, NULL, NULL, "GoToNextSelectedName", 0, 0, NULL, NULL},
+        /*TBBE_RESELECT*/ {IDX_TB_RESELECT, 0, IDS_TBTT_RESELECT, CM_RESELECT, 0, 0, 0, 0, 0, &EnablerSelectionStored, NULL, NULL, "RestoreSelection", 0, 0, NULL, NULL},
+        /*TBBE_PASTESHORTCUT*/ {IDX_TB_PASTESHORTCUT, 0, IDS_TBTT_PASTESHORTCUT, CM_CLIPPASTELINKS, 0, 0, 0, 0, 0, &EnablerPasteLinksOnDisk, NULL, NULL, "PasteShortcut", 0, 0, NULL, NULL},
+        /*TBBE_FOCUSSHORTCUT*/ {IDX_TB_FOCUSSHORTCUT, 0, IDS_TBTT_FOCUSSHORTCUT, CM_AFOCUSSHORTCUT, 0, 0, 0, 0, 0, &EnablerFileOrDirLinkOnDisk, NULL, NULL, "GoToShortcutTarget", 0, 0, NULL, NULL},
+        /*TBBE_SAVESELECTION*/ {IDX_TB_SAVESELECTION, 0, IDS_TBTT_SAVESELECTION, CM_STORESEL, 0, 0, 0, 0, 0, &EnablerSelected, NULL, NULL, "SaveSelection", 0, 0, NULL, NULL},
+        /*TBBE_LOADSELECTION*/ {IDX_TB_LOADSELECTION, 0, IDS_TBTT_LOADSELECTION, CM_RESTORESEL, 0, 0, 0, 0, 0, &EnablerGlobalSelStored, NULL, NULL, "LoadSelection", 0, 0, NULL, NULL},
+        /*TBBE_NEW*/ {IDX_TB_NEW, 0, IDS_TBTT_NEW, CM_NEWDROP, 0, 0, 0, 1, 0, &EnablerOnDisk, NULL, NULL, "New", 0, 0, NULL, NULL},
+        /*TBBE_SEL_BY_EXT*/ {IDX_TB_SEL_BY_EXT, 0, IDS_TBTT_SEL_BY_EXT, CM_SELECTBYFOCUSEDEXT, 0, 0, 0, 0, 0, &EnablerFileDir, NULL, NULL, "SelectFilesWithSameExtension", 0, 0, NULL, NULL},
+        /*TBBE_UNSEL_BY_EXT*/ {IDX_TB_UNSEL_BY_EXT, 0, IDS_TBTT_UNSEL_BY_EXT, CM_UNSELECTBYFOCUSEDEXT, 0, 0, 0, 0, 0, &EnablerFileDirANDSelected, NULL, NULL, "UnselectFilesWithSameExtension", 0, 0, NULL, NULL},
+        /*TBBE_SEL_BY_NAME*/ {IDX_TB_SEL_BY_NAME, 0, IDS_TBTT_SEL_BY_NAME, CM_SELECTBYFOCUSEDNAME, 0, 0, 0, 0, 0, &EnablerFileDir, NULL, NULL, "SelectFilesWithSameName", 0, 0, NULL, NULL},
+        /*TBBE_UNSEL_BY_NAME*/ {IDX_TB_UNSEL_BY_NAME, 0, IDS_TBTT_UNSEL_BY_NAME, CM_UNSELECTBYFOCUSEDNAME, 0, 0, 0, 0, 0, &EnablerFileDirANDSelected, NULL, NULL, "UnselectFilesWithSameName", 0, 0, NULL, NULL},
+        /*TBBE_OPEN_FOLDER*/ {NIB1(IDX_TB_OPEN_FOLDER), 0, IDS_TBTT_OPEN_FOLDER, CM_OPEN_FOLDER_DROP, 0, 0, 0, 1, 0, NULL, NULL, NULL, "OpenFolder", 0, 0, NULL, NULL},
+        /*TBBE_CONFIGRATION*/ {IDX_TB_CONFIGURARTION, 0, IDS_TBTT_CONFIGURATION, CM_CONFIGURATION, 0, 0, 0, 0, 0, NULL, NULL, NULL, "Configuration", 0, 0, NULL, NULL},
+        /*TBBE_DIRMENU*/ {0xFFFF, 0, IDS_TBTT_DIRMENU, CM_DIRMENU, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL},
+        /*TBBE_OPEN_IN_OTHER_ACT*/ {IDX_TB_OPEN_IN_OTHER_ACT, 0, IDS_TBTT_OPENINOTHER_A, CM_OPEN_IN_OTHER_PANEL_ACT, 0, 0, 0, 0, 0, NULL, NULL, NULL, "FocusNameInOtherPanel", 0, 0, NULL, NULL},
+        /*TBBE_OPEN_IN_OTHER*/ {IDX_TB_OPEN_IN_OTHER, 0, IDS_TBTT_OPENINOTHER, CM_OPEN_IN_OTHER_PANEL, 0, 0, 0, 0, 0, NULL, NULL, NULL, "OpenNameInOtherPanel", 0, 0, NULL, NULL},
+        /*TBBE_AS_OTHER_PANEL*/ {IDX_TB_AS_OTHER_PANEL, 0, IDS_TBTT_ASOTHERPANEL, CM_ACTIVE_AS_OTHER, CM_LEFT_AS_OTHER, CM_RIGHT_AS_OTHER, 0, 0, 0, NULL, NULL, NULL, "GoToPathFromOtherPanel", 0, 0, NULL, NULL},
+        /*TBBE_HIDE_SELECTED*/ {IDX_TB_HIDE_SELECTED, 0, IDS_TBTT_HIDE_SELECTED, CM_HIDE_SELECTED_NAMES, 0, 0, 0, 0, 0, &EnablerSelected, NULL, NULL, "HideSelectedNames", 0, 0, NULL, NULL},
+        /*TBBE_HIDE_UNSELECTED*/ {IDX_TB_HIDE_UNSELECTED, 0, IDS_TBTT_HIDE_UNSELECTED, CM_HIDE_UNSELECTED_NAMES, 0, 0, 0, 0, 0, &EnablerUnselected, NULL, NULL, "HideUnselectedNames", 0, 0, NULL, NULL},
+        /*TBBE_SHOW_ALL*/ {IDX_TB_SHOW_ALL, 0, IDS_TBTT_SHOW_ALL, CM_SHOW_ALL_NAME, 0, 0, 0, 0, 0, &EnablerHiddenNames, NULL, NULL, "ShowHiddenNames", 0, 0, NULL, NULL},
+        /*TBBE_OPEN_MYDOC*/ {NIB1(IDX_TB_OPENMYDOC), 21, IDS_TBTT_OPENMYDOC, CM_OPENPERSONAL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, 0, 0, NULL, NULL},
+        /*TBBE_SMART_COLUMN_MODE*/ {IDX_TB_SMART_COLUMN_MODE, 0, IDS_TBTT_SMARTMODE, CM_ACTIVE_SMARTMODE, CM_LEFT_SMARTMODE, CM_RIGHT_SMARTMODE, 0, 0, 0, NULL, NULL, NULL, "SmartColumnMode", CM_BOTTOMLEFT_SMARTMODE, CM_BOTTOMRIGHT_SMARTMODE, NULL, NULL},
 
+            //  added for bottom panels
+        /*TBBE_CHANGE_DRIVE_BL*/ {IDX_TB_CHANGEDRIVEL, 255, IDS_TBTT_CHANGEDRIVE, CM_BLCHANGEDRIVE, 0, 0, 0, 1, 0, NULL, NULL, NULL, NULL, CM_BLCHANGEDRIVE, 0, NULL, NULL},
+        /*TBBE_CHANGE_DRIVE_BR*/ {IDX_TB_CHANGEDRIVER, 255, IDS_TBTT_CHANGEDRIVE, CM_BRCHANGEDRIVE, 0, 0, 0, 1, 0, NULL, NULL, NULL, NULL, 0, CM_BRCHANGEDRIVE, NULL, NULL},
 };
 
 //
@@ -384,6 +393,48 @@ DWORD LeftToolBarButtons[] =
 DWORD RightToolBarButtons[] =
     {
         TBBE_CHANGE_DRIVE_R,
+        TBBE_PARENT_DIR,
+        TBBE_ROOT_DIR,
+        TBBE_CHANGEDIR,
+        TBBE_AS_OTHER_PANEL,
+        TBBE_BACK,
+        TBBE_FORWARD,
+        TBBE_VIEW_MODE,
+        TBBE_SORT_NAME,
+        TBBE_SORT_EXT,
+        TBBE_SORT_SIZE,
+        TBBE_SORT_DATE,
+        TBBE_FILTER,
+        TBBE_REFRESH,
+        TBBE_SMART_COLUMN_MODE,
+
+        TBBE_TERMINATOR // terminator - musi zde byt !
+};
+
+DWORD BottomLeftToolBarButtons[] =
+    {
+        TBBE_CHANGE_DRIVE_BL,
+        TBBE_PARENT_DIR,
+        TBBE_ROOT_DIR,
+        TBBE_CHANGEDIR,
+        TBBE_AS_OTHER_PANEL,
+        TBBE_BACK,
+        TBBE_FORWARD,
+        TBBE_VIEW_MODE,
+        TBBE_SORT_NAME,
+        TBBE_SORT_EXT,
+        TBBE_SORT_SIZE,
+        TBBE_SORT_DATE,
+        TBBE_FILTER,
+        TBBE_REFRESH,
+        TBBE_SMART_COLUMN_MODE,
+
+        TBBE_TERMINATOR // terminator - musi zde byt !
+};
+
+DWORD BottomRightToolBarButtons[] =
+    {
+        TBBE_CHANGE_DRIVE_BR,
         TBBE_PARENT_DIR,
         TBBE_ROOT_DIR,
         TBBE_CHANGEDIR,
@@ -1002,11 +1053,22 @@ BOOL CMainToolBar::FillTII(int tbbeIndex, TLBI_ITEM_INFO2* tii, BOOL fillName)
         tii->Style = TLBI_STYLE_SEPARATOR;
     }
     else
-    {
-        if (Type == mtbtLeft && tbbeIndex == TBBE_CHANGE_DRIVE_R)
+    {   
+        if (Type == mtbtLeft &&
+            (tbbeIndex == TBBE_CHANGE_DRIVE_R || tbbeIndex == TBBE_CHANGE_DRIVE_BL || tbbeIndex == TBBE_CHANGE_DRIVE_BR))
             tbbeIndex = TBBE_CHANGE_DRIVE_L;
-        if (Type == mtbtRight && tbbeIndex == TBBE_CHANGE_DRIVE_L)
+        if (Type == mtbtRight &&
+            (tbbeIndex == TBBE_CHANGE_DRIVE_L || tbbeIndex == TBBE_CHANGE_DRIVE_BL || tbbeIndex == TBBE_CHANGE_DRIVE_BR))
             tbbeIndex = TBBE_CHANGE_DRIVE_R;
+
+        if (Type == mtbtBottomLeft &&
+            (tbbeIndex == TBBE_CHANGE_DRIVE_R || tbbeIndex == TBBE_CHANGE_DRIVE_L || tbbeIndex == TBBE_CHANGE_DRIVE_BR))
+            tbbeIndex = TBBE_CHANGE_DRIVE_BL;
+        if (Type == mtbtBottomRight &&
+            (tbbeIndex == TBBE_CHANGE_DRIVE_L || tbbeIndex == TBBE_CHANGE_DRIVE_R || tbbeIndex == TBBE_CHANGE_DRIVE_BL))
+            tbbeIndex = TBBE_CHANGE_DRIVE_BR;
+        
+
         tii->Mask = TLBI_MASK_STYLE | TLBI_MASK_ID |
                     TLBI_MASK_ENABLER | TLBI_MASK_CUSTOMDATA;
         tii->Style = 0;
@@ -1041,6 +1103,19 @@ BOOL CMainToolBar::FillTII(int tbbeIndex, TLBI_ITEM_INFO2* tii, BOOL fillName)
         {
             tii->ID = ToolBarButtons[tbbeIndex].RightID;
             tii->Enabler = ToolBarButtons[tbbeIndex].RightEnabler;
+            break;
+        }
+        case mtbtBottomLeft:
+        {
+            tii->ID = ToolBarButtons[tbbeIndex].BottomLeftID;
+            tii->Enabler = ToolBarButtons[tbbeIndex].BottomLeftEnabler;
+            break;
+        }
+
+        case mtbtBottomRight:
+        {
+            tii->ID = ToolBarButtons[tbbeIndex].BottomRightID;
+            tii->Enabler = ToolBarButtons[tbbeIndex].BottomRightEnabler;
             break;
         }
         }
@@ -1162,6 +1237,12 @@ BOOL CMainToolBar::OnEnumButton(LPARAM lParam)
     case mtbtRight:
         tbbeIndex = RightToolBarButtons[tii->Index];
         break;
+    case mtbtBottomLeft:
+        tbbeIndex = BottomLeftToolBarButtons[tii->Index];
+        break;
+    case mtbtBottomRight:
+        tbbeIndex = BottomRightToolBarButtons[tii->Index];
+        break;
     }
     if (tbbeIndex == TBBE_TERMINATOR)
         return FALSE; // vsechna tlacitka uz byla natlacena
@@ -1186,6 +1267,12 @@ void CMainToolBar::OnReset()
         break;
     case mtbtRight:
         defStr = DefRightToolBar;
+        break;
+    case mtbtBottomLeft:
+        defStr = DefBottomLeftToolBar;
+        break;
+    case mtbtBottomRight:
+        defStr = DefBottomRightToolBar;
         break;
     }
     if (defStr != NULL)
@@ -1232,8 +1319,8 @@ CBottomTBData BottomTBData[btbsCount][12] =
         {
             {TBBE_CHANGE_DRIVE_L}, // F1
             {TBBE_CHANGE_DRIVE_R}, // F2
-            {TBBE_ALTVIEW},        // F3
-            {TBBE_EXIT},           // F4
+            {TBBE_ALTVIEW},        // F3      // here can be replaced  {TBBE_CHANGE_DRIVE_BL}, // F3
+            {TBBE_EXIT},           // F4      // here can be replaced {TBBE_CHANGE_DRIVE_BR}, // F4
             {TBBE_PACK},           // F5
             {TBBE_UNPACK},         // F6
             {TBBE_FIND_FILE},      // F7

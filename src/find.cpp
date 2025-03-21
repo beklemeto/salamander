@@ -7,6 +7,7 @@
 #include "find.h"
 #include "md5.h"
 
+
 char* FindNamedHistory[FIND_NAMED_HISTORY_SIZE];
 char* FindLookInHistory[FIND_LOOKIN_HISTORY_SIZE];
 char* FindGrepHistory[FIND_GREP_HISTORY_SIZE];
@@ -1511,6 +1512,15 @@ BOOL AddFoundItem(const char* path, const char* name, DWORD sizeLow, DWORD sizeH
     return TRUE;
 }
 
+/*
+dirStack' is used to store the directory for later grep. Otherwise, a recursive search in subdirectories would occur while searching the current directory. This approach will first find all files and directories that match the criteria, and then this function will be called for all found directories.
+'dirStack' is only inflated. If items are deleted from it,
+they are only destroyed, but not removed from the array. Therefore, the 'dirStackCount' variable is passed, which contains the actual number of items in the array (always less than or equal to dirStack->Count).
+If there is insufficient memory or subdirectories are not searched,
+'dirStack' is equal to NULL.
+If 'duplicateCandidates' != NULL, found items will be added to this array instead of data->FoundFilesListView
+*/
+
 // 'dirStack' slouzi k ukladani adresaru pro pozdni grepnuti. Jinak
 // by behem hledani v aktualnim adresari doslo k rekurzivnimu hledani
 // v podadresarich. Touto obezlickou budou napred nalezeny vsechny
@@ -1954,7 +1964,9 @@ unsigned GrepThreadFBody(void* ptr)
 
                 char message[2 * MAX_PATH];
                 SearchDirectory(path, end, (int)(end - path), mg, includeSubDirs, data, dirStack, 0,
-                                duplicateCandidates, ignoreList, message);
+                                    duplicateCandidates, ignoreList, message);
+
+                
 
                 if (ignoreList != NULL)
                     delete ignoreList;

@@ -260,10 +260,14 @@ void CLoadSaveToRegistryMutex::Leave()
 // CConfiguration
 //
 
+//  numbers are defines from toolbar4.cpp
 const char* DefTopToolBar = "11,14,15,70,-1,40,56,-1,30,31,32,-1,41,42,18,27,55,33,-1,3,34,35,20,19,-1,43,46,49";
 const char* DefMiddleToolBar = "2,3,17,21,22,23,72,26,24,25,27,55,28,29,30,31,32,33";
-const char* DefLeftToolBar = "36";
-const char* DefRightToolBar = "51";
+const char* DefLeftToolBar = "36, 14, 15, 11,16";          //TBBE_CHANGE_DRIVE_L,TBBE_BACK,TBBE_FORWARD,TBBE_PARENT_DIR,TBBE_REFRESH
+const char* DefRightToolBar = "51, 14, 15, 11,16";         //TBBE_CHANGE_DRIVE_R
+const char* DefBottomLeftToolBar = "99, 14, 15, 11,16";    //TBBE_CHANGE_DRIVE_BL
+const char* DefBottomRightToolBar = "100, 14, 15, 11,16";  //TBBE_CHANGE_DRIVE_BR
+
 
 CConfiguration::CConfiguration()
 {
@@ -315,7 +319,7 @@ CConfiguration::CConfiguration()
     UserMenuToolBarVisible = FALSE;
     HotPathsBarVisible = FALSE;
     DriveBarVisible = TRUE;
-    DriveBar2Visible = FALSE;
+    DriveBar2Visible = TRUE;
     IconSpacingVert = 43;
     IconSpacingHorz = 43;
     TileSpacingVert = 8;
@@ -373,8 +377,8 @@ CConfiguration::CConfiguration()
     QuickSearchEnterAlt = FALSE;
 
     // pro zobrazeni polozek v panelu
-    FullRowSelect = FALSE;
-    FullRowHighlight = TRUE;
+    FullRowSelect = TRUE;
+    FullRowHighlight = FALSE;
     UseIconTincture = TRUE;
     ShowPanelCaption = TRUE;
     ShowPanelZoom = TRUE;
@@ -410,6 +414,8 @@ CConfiguration::CConfiguration()
     strcpy(MiddleToolBar, DefMiddleToolBar);
     strcpy(LeftToolBar, DefLeftToolBar);
     strcpy(RightToolBar, DefRightToolBar);
+    strcpy(BottomLeftToolBar, DefBottomLeftToolBar);
+    strcpy(BottomRightToolBar, DefBottomRightToolBar);
 
     SkillLevel = SKILL_LEVEL_ADVANCED; // pokusime se prezentovat maximum moznosti
 
@@ -462,6 +468,11 @@ CConfiguration::CConfiguration()
 
     // Change drive
     ChangeDriveShowMyDoc = TRUE;
+    ChangeDriveShowDownloads = TRUE;
+    ChangeDriveShowDesktop = TRUE;
+    ChangeDriveShowMyVideos = TRUE;
+    ChangeDriveShowMyPictures = TRUE;
+    ChangeDriveShowMyMusic = TRUE;   
     ChangeDriveShowAnother = TRUE;
     ChangeDriveShowNet = TRUE;
     ChangeDriveCloudStorage = TRUE;
@@ -1071,9 +1082,9 @@ void CCfgPageView::Validate(CTransferInfo& ti)
 {
 }
 
-const int CFGP2ItemsCount = 8 /*9*/;
-const int CFGP2Flags[CFGP2ItemsCount] = {0, VIEW_SHOW_EXTENSION, VIEW_SHOW_DOSNAME, VIEW_SHOW_SIZE, VIEW_SHOW_TYPE, VIEW_SHOW_DATE, VIEW_SHOW_TIME, VIEW_SHOW_ATTRIBUTES /*, VIEW_SHOW_DESCRIPTION*/};
-const int CFGP2ResID[CFGP2ItemsCount] = {IDS_COLUMN_CFG_NAME, IDS_COLUMN_CFG_EXT, IDS_COLUMN_CFG_DOSNAME, IDS_COLUMN_CFG_SIZE, IDS_COLUMN_CFG_TYPE, IDS_COLUMN_CFG_DATE, IDS_COLUMN_CFG_TIME, IDS_COLUMN_CFG_ATTR /*,  IDS_COLUMN_CFG_DESC*/};
+const int CFGP2ItemsCount = 9 /*9*/;
+const int CFGP2Flags[CFGP2ItemsCount] = {0, VIEW_SHOW_EXTENSION, VIEW_SHOW_DOSNAME, VIEW_SHOW_SIZE, VIEW_SHOW_TYPE, VIEW_SHOW_AGE, VIEW_SHOW_DATE, VIEW_SHOW_TIME, VIEW_SHOW_ATTRIBUTES /*, VIEW_SHOW_DESCRIPTION*/};
+const int CFGP2ResID[CFGP2ItemsCount] = {IDS_COLUMN_CFG_NAME, IDS_COLUMN_CFG_EXT, IDS_COLUMN_CFG_DOSNAME, IDS_COLUMN_CFG_SIZE, IDS_COLUMN_CFG_TYPE, IDS_COLUMN_CFG_AGE, IDS_COLUMN_CFG_DATE, IDS_COLUMN_CFG_TIME, IDS_COLUMN_CFG_ATTR /*,  IDS_COLUMN_CFG_DESC*/};
 
 void CCfgPageView::LoadControls()
 {
@@ -1120,6 +1131,7 @@ void CCfgPageView::LoadControls()
             ListView_SetItemState(HListView2, i, state, LVIS_STATEIMAGEMASK);
         }
         CTransferInfo ti(HWindow, ttDataToWindow);
+
         int tmp = Config.Items[index].LeftSmartMode;
         ti.CheckBox(IDC_VIEW_LEFT_SMARTMODE, tmp);
         tmp = Config.Items[index].RightSmartMode;
@@ -1135,6 +1147,23 @@ void CCfgPageView::LoadControls()
             ti.EditLine(IDC_VIEW_LEFT_WIDTH, tmp);
             tmp = Config.Items[index].Columns[index2].RightWidth;
             ti.EditLine(IDC_VIEW_RIGHT_WIDTH, tmp);
+        }
+
+        tmp = Config.Items[index].BottomLeftSmartMode;
+        ti.CheckBox(IDC_VIEW_BOTTOMLEFT_SMARTMODE, tmp);
+        tmp = Config.Items[index].BottomRightSmartMode;
+        ti.CheckBox(IDC_VIEW_BOTTOMRIGHT_SMARTMODE, tmp);
+        index2 = ListView_GetNextItem(HListView2, -1, LVNI_SELECTED);
+        if (index2 != -1)
+        {
+            tmp = Config.Items[index].Columns[index2].BottomLeftFixedWidth;
+            ti.CheckBox(IDC_VIEW_BOTTOMLEFT_FIXED, tmp);
+            tmp = Config.Items[index].Columns[index2].BottomRightFixedWidth;
+            ti.CheckBox(IDC_VIEW_BOTTOMRIGHT_FIXED, tmp);
+            tmp = Config.Items[index].Columns[index2].BottomLeftWidth;
+            ti.EditLine(IDC_VIEW_BOTTOMLEFT_WIDTH, tmp);
+            tmp = Config.Items[index].Columns[index2].BottomRightWidth;
+            ti.EditLine(IDC_VIEW_BOTTOMRIGHT_WIDTH, tmp);
         }
     }
 
@@ -1177,17 +1206,25 @@ void CCfgPageView::EnableControls()
     {
         ti.CheckBox(IDC_VIEW_LEFT_FIXED, tmp);
         ti.CheckBox(IDC_VIEW_RIGHT_FIXED, tmp);
+        ti.CheckBox(IDC_VIEW_BOTTOMLEFT_FIXED, tmp);
+        ti.CheckBox(IDC_VIEW_BOTTOMRIGHT_FIXED, tmp);
         char buff[] = "";
         ti.EditLine(IDC_VIEW_LEFT_WIDTH, buff, 1);
         ti.EditLine(IDC_VIEW_RIGHT_WIDTH, buff, 1);
+        ti.EditLine(IDC_VIEW_BOTTOMLEFT_WIDTH, buff, 1);
+        ti.EditLine(IDC_VIEW_BOTTOMRIGHT_WIDTH, buff, 1);
     }
     if (!enable)
     {
         ti.CheckBox(IDC_VIEW_LEFT_SMARTMODE, tmp);
         ti.CheckBox(IDC_VIEW_RIGHT_SMARTMODE, tmp);
+        ti.CheckBox(IDC_VIEW_BOTTOMLEFT_SMARTMODE, tmp);
+        ti.CheckBox(IDC_VIEW_BOTTOMRIGHT_SMARTMODE, tmp);
     }
     BOOL enableLeftEdit = supportFixedWidth && IsDlgButtonChecked(HWindow, IDC_VIEW_LEFT_FIXED) == BST_CHECKED;
     BOOL enableRightEdit = supportFixedWidth && IsDlgButtonChecked(HWindow, IDC_VIEW_RIGHT_FIXED) == BST_CHECKED;
+    BOOL enableBottomLeftEdit = supportFixedWidth && IsDlgButtonChecked(HWindow,  IDC_VIEW_BOTTOMLEFT_FIXED) == BST_CHECKED;
+    BOOL enableBottomRightEdit = supportFixedWidth && IsDlgButtonChecked(HWindow, IDC_VIEW_BOTTOMRIGHT_FIXED) == BST_CHECKED;
 
     EnableWindow(GetDlgItem(HWindow, IDC_VIEW_TEXT4), enable);
     EnableWindow(GetDlgItem(HWindow, IDC_VIEW_TEXT6), enable);
@@ -1195,11 +1232,17 @@ void CCfgPageView::EnableControls()
     EnableWindow(GetDlgItem(HWindow, IDC_VIEW_RIGHT_FIXED), supportFixedWidth);
     EnableWindow(GetDlgItem(HWindow, IDC_VIEW_LEFT_WIDTH), enableLeftEdit);
     EnableWindow(GetDlgItem(HWindow, IDC_VIEW_RIGHT_WIDTH), enableRightEdit);
+    EnableWindow(GetDlgItem(HWindow, IDC_VIEW_BOTTOMLEFT_FIXED), supportFixedWidth);
+    EnableWindow(GetDlgItem(HWindow, IDC_VIEW_BOTTOMRIGHT_FIXED), supportFixedWidth);
+    EnableWindow(GetDlgItem(HWindow, IDC_VIEW_BOTTOMLEFT_WIDTH), enableBottomLeftEdit);
+    EnableWindow(GetDlgItem(HWindow, IDC_VIEW_BOTTOMRIGHT_WIDTH), enableBottomRightEdit);
     EnableWindow(GetDlgItem(HWindow, IDC_VIEW_TEXT2), supportFixedWidth);
     EnableWindow(GetDlgItem(HWindow, IDC_VIEW_TEXT5), supportFixedWidth);
+    EnableWindow(GetDlgItem(HWindow, IDC_VIEW_TEXT8), supportFixedWidth);
+    EnableWindow(GetDlgItem(HWindow, IDC_VIEW_TEXT9), supportFixedWidth);
     EnableWindow(GetDlgItem(HWindow, IDC_VIEW_TEXT7), enable);
-    EnableWindow(GetDlgItem(HWindow, IDC_VIEW_LEFT_SMARTMODE), enable);
-    EnableWindow(GetDlgItem(HWindow, IDC_VIEW_RIGHT_SMARTMODE), enable);
+    EnableWindow(GetDlgItem(HWindow, IDC_VIEW_BOTTOMLEFT_SMARTMODE), enable);
+    EnableWindow(GetDlgItem(HWindow, IDC_VIEW_BOTTOMRIGHT_SMARTMODE), enable);
 }
 
 DWORD
@@ -1556,6 +1599,34 @@ CCfgPageView::DialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
                 }
                 EnableControls();
             }
+            // : check whether this is needed /works
+            if (LOWORD(wParam) == IDC_VIEW_BOTTOMLEFT_FIXED || LOWORD(wParam) == IDC_VIEW_BOTTOMRIGHT_FIXED ||
+                LOWORD(wParam) == IDC_VIEW_BOTTOMLEFT_SMARTMODE || LOWORD(wParam) == IDC_VIEW_BOTTOMRIGHT_SMARTMODE)
+            {
+                int index = ListView_GetNextItem(HListView, -1, LVNI_SELECTED);
+                int index2 = ListView_GetNextItem(HListView2, -1, LVNI_SELECTED);
+                if (index >= 2 && index2 != -1)
+                {
+                    BOOL checked = IsDlgButtonChecked(HWindow, LOWORD(wParam)) == BST_CHECKED;
+                    switch (LOWORD(wParam))
+                    {
+                    case IDC_VIEW_BOTTOMLEFT_FIXED:
+                        Config.Items[index].Columns[index2].BottomLeftFixedWidth = checked ? 1 : 0;
+                        break;
+                    case IDC_VIEW_BOTTOMRIGHT_FIXED:
+                        Config.Items[index].Columns[index2].BottomRightFixedWidth = checked ? 1 : 0;
+                        break;
+                    case IDC_VIEW_BOTTOMLEFT_SMARTMODE:
+                        Config.Items[index].BottomLeftSmartMode = checked;
+                        break;
+                    case IDC_VIEW_BOTTOMRIGHT_SMARTMODE:
+                        Config.Items[index].BottomRightSmartMode = checked;
+                        break;
+                    }
+                    Dirty = TRUE;
+                }
+                EnableControls();
+            }
             break;
         }
 
@@ -1578,6 +1649,27 @@ CCfgPageView::DialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
                     {
                         ti.EditLine(IDC_VIEW_RIGHT_WIDTH, tmp);
                         Config.Items[index].Columns[index2].RightWidth = tmp;
+                    }
+                    Dirty = TRUE;
+                }
+            }
+            if (LOWORD(wParam) == IDC_VIEW_BOTTOMLEFT_WIDTH || LOWORD(wParam) == IDC_VIEW_BOTTOMRIGHT_WIDTH)
+            {
+                int index = ListView_GetNextItem(HListView, -1, LVNI_SELECTED);
+                int index2 = ListView_GetNextItem(HListView2, -1, LVNI_SELECTED);
+                if (index >= 2 && index2 != -1)
+                {
+                    CTransferInfo ti(HWindow, ttDataFromWindow);
+                    int tmp;
+                    if (LOWORD(wParam) == IDC_VIEW_BOTTOMLEFT_WIDTH)
+                    {
+                        ti.EditLine(IDC_VIEW_BOTTOMLEFT_WIDTH, tmp);
+                        Config.Items[index].Columns[index2].BottomLeftWidth = tmp;
+                    }
+                    else
+                    {
+                        ti.EditLine(IDC_VIEW_BOTTOMRIGHT_WIDTH, tmp);
+                        Config.Items[index].Columns[index2].BottomRightWidth = tmp;
                     }
                     Dirty = TRUE;
                 }
@@ -4030,6 +4122,10 @@ void CCfgPageHistory::OnClearHistory()
         MainWindow->LeftPanel->ChangeToRescuePathOrFixedDrive(HWindow);
     if (MainWindow->RightPanel != NULL)
         MainWindow->RightPanel->ChangeToRescuePathOrFixedDrive(HWindow);
+    if (MainWindow->BottomLeftPanel != NULL)
+        MainWindow->BottomLeftPanel->ChangeToRescuePathOrFixedDrive(HWindow);
+    if (MainWindow->BottomRightPanel != NULL)
+        MainWindow->BottomRightPanel->ChangeToRescuePathOrFixedDrive(HWindow);
 
     // historie hlavniho okna (FileHistory, DirHistory)
     MainWindow->ClearHistory();
@@ -4052,6 +4148,10 @@ void CCfgPageHistory::OnClearHistory()
         MainWindow->LeftPanel->ClearHistory();
     if (MainWindow->RightPanel != NULL)
         MainWindow->RightPanel->ClearHistory();
+    if (MainWindow->BottomLeftPanel != NULL)
+        MainWindow->BottomLeftPanel->ClearHistory();
+    if (MainWindow->BottomRightPanel != NULL)
+        MainWindow->BottomRightPanel->ClearHistory();
 
     // vycistime historii ve vsech pluginech (zustanou vsechny naloadene, aby sel
     // provest dodatecne Save - smazani dat v Registry)

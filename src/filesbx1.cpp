@@ -1770,12 +1770,20 @@ CFilesBox::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
                 if (size != Configuration.ThumbnailSize)
                 {
                     Configuration.ThumbnailSize = size;
+
                     MainWindow->LeftPanel->SetThumbnailSize(size);
                     MainWindow->RightPanel->SetThumbnailSize(size);
                     if (MainWindow->LeftPanel->GetViewMode() == vmThumbnails)
                         MainWindow->LeftPanel->RefreshForConfig();
                     if (MainWindow->RightPanel->GetViewMode() == vmThumbnails)
                         MainWindow->RightPanel->RefreshForConfig();
+
+                    MainWindow->BottomLeftPanel->SetThumbnailSize(size);
+                    MainWindow->BottomRightPanel->SetThumbnailSize(size);
+                    if (MainWindow->BottomLeftPanel->GetViewMode() == vmThumbnails)
+                        MainWindow->BottomLeftPanel->RefreshForConfig();
+                    if (MainWindow->BottomRightPanel->GetViewMode() == vmThumbnails)
+                        MainWindow->BottomRightPanel->RefreshForConfig();
                 }
             }
         }
@@ -2508,11 +2516,12 @@ void CFilesBox::LayoutChilds(BOOL updateAndCheck)
 
             if (ViewMode == vmDetailed) // prepocitame sirku sloupce Name ve smart-mode detail view
             {
-                BOOL leftPanel = (Parent == MainWindow->LeftPanel);
+                BOOL leftPanel = Parent->IsLeftPanel();
                 CColumn* nameCol = &Parent->Columns[0];
+
                 if (nameCol->FixedWidth == 0 &&
-                    (leftPanel && Parent->ViewTemplate->LeftSmartMode ||
-                     !leftPanel && Parent->ViewTemplate->RightSmartMode))
+                    (leftPanel && (Parent->ViewTemplate->LeftSmartMode || Parent->ViewTemplate->BottomLeftSmartMode) ||
+                     !leftPanel && (Parent->ViewTemplate->RightSmartMode || Parent->ViewTemplate->BottomRightSmartMode)))
                 {
                     DWORD newNameWidth = Parent->GetResidualColumnWidth(Parent->FullWidthOfNameCol);
                     DWORD minWidth = Parent->WidthOfMostOfNames;

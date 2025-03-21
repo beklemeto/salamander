@@ -34,6 +34,437 @@ int ImageDragH = INT_MAX;
 int ImageDragDxHotspot = INT_MAX;
 int ImageDragDyHotspot = INT_MAX;
 
+
+//****************************************************************************
+//
+// CMainWindow Splitbars Dragging
+//
+
+BOOL CMainWindow::SplitBarDragBegin(POINT p, BOOL leftButtonDown, BOOL leftButtonClick)
+{
+    //  extend for horizontal splitters
+    
+    if (HasLockedUI())
+        return FALSE;
+        
+    RECT r;
+    GetSplitRect(r);
+
+    if (PtInRect(&r, p))
+    {
+        if (leftButtonDown) // klik -> pocatek tazeni
+        {
+            UpdateWindow(HWindow);        // pokud je Salamander dole, nechame prekreslit vsechna okna
+            MainWindow->CancelPanelsUI(); // cancel QuickSearch and QuickEdit
+            BeginStopIconRepaint();       // neprejeme si zadne repainty ikon
+            if (!DragFullWindows)
+                BeginStopStatusbarRepaint(); // neprejeme si prekreslovani throbberu, pokud tahame xorovany splitbar
+
+            DragMode = DRAG_MODE_MIDDLE;
+            midSplitter.DragAnchor = p.x - r.left;
+            SetCapture(HWindow);
+
+            HWND toolTip = CreateWindowEx(0,
+                                          TOOLTIPS_CLASS,
+                                          NULL,
+                                          TTS_ALWAYSTIP | TTS_NOPREFIX,
+                                          CW_USEDEFAULT,
+                                          CW_USEDEFAULT,
+                                          CW_USEDEFAULT,
+                                          CW_USEDEFAULT,
+                                          NULL,
+                                          NULL,
+                                          HInstance,
+                                          NULL);
+            ToolTipWindow.AttachToWindow(toolTip);
+            ToolTipWindow.SetToolWindow(HWindow);
+            TOOLINFO ti;
+            ti.cbSize = sizeof(TOOLINFO);
+            ti.uFlags = TTF_SUBCLASS | TTF_ABSOLUTE | TTF_TRACK;
+            ti.hwnd = HWindow;
+            ti.uId = 1;
+            GetClientRect(HWindow, &ti.rect);
+            ti.hinst = HInstance;
+            ti.lpszText = LPSTR_TEXTCALLBACK;
+            SendMessage(ToolTipWindow.HWindow, TTM_ADDTOOL, 0, (LPARAM)&ti);
+
+            int splitWidth = MainWindow->GetSplitBarWidth();
+            midSplitter.DragSplitPosition = midSplitter.SplitPosition;
+            POINT mp;
+            GetCursorPos(&mp);
+            POINT p2;
+            p2.x = r.left;
+            p2.y = 0;
+            ClientToScreen(HWindow, &p2);
+            mp.x = p2.x;
+            SendMessage(ToolTipWindow.HWindow, TTM_TRACKPOSITION, 0, (LPARAM)(DWORD)MAKELONG(mp.x + splitWidth + 2, mp.y + 10));
+            SendMessage(ToolTipWindow.HWindow, TTM_TRACKACTIVATE, TRUE, (LPARAM)&ti);
+
+            GetWindowSplitRect(r);
+            DragSplitX = p.x - midSplitter.DragAnchor;
+            DrawSplitLine(HWindow, DragSplitX, -1, r);
+            return TRUE;
+        }
+        if (leftButtonClick)
+        {
+            if (midSplitter.SplitPosition != 0.5)
+            {
+                midSplitter.SplitPosition = 0.5;
+                LayoutWindows();
+                FocusPanel(GetActivePanel());
+            }
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+void CMainWindow::SplitBarDragMove(POINT p)
+{
+    if (HasLockedUI())
+        return;
+
+    if (DragMode != DragModeType::DRAG_MODE_MIDDLE)
+        return;
+            
+    RECT r;
+    GetWindowSplitRect(r);
+
+    int splitWidth = MainWindow->GetSplitBarWidth();
+
+    // zarazka na stredu
+    double splitPosition = (double)(p.x - midSplitter.DragAnchor) / (WindowWidth - splitWidth);
+
+    if (splitPosition >= 0.49 && splitPosition <= 0.51)
+    {
+        p.x = (WindowWidth - splitWidth) / 2 + midSplitter.DragAnchor;
+        splitPosition = 0.5;
+    }
+
+
+    if (splitPosition < 0)
+        splitPosition = 0;
+    if (splitPosition > 1)
+        splitPosition = 1;
+
+    int leftWidth = p.x - midSplitter.DragAnchor;
+    if (leftWidth < MIN_WIN_WIDTH + 1)
+        leftWidth = MIN_WIN_WIDTH + 1;
+    int rightWidth = WindowWidth - 2 - leftWidth - splitWidth;
+    if (rightWidth < MIN_WIN_WIDTH - 1)
+    {
+        rightWidth = MIN_WIN_WIDTH - 1;
+        leftWidth = WindowWidth - 2 - splitWidth - rightWidth;
+    }
+
+    TOOLINFO ti;
+    ti.cbSize = sizeof(TOOLINFO);
+    ti.uFlags = 0;
+    ti.hwnd = HWindow;
+    ti.uId = 1;
+    GetClientRect(HWindow, &ti.rect);
+
+    midSplitter.DragSplitPosition = splitPosition;
+
+    //POINT p;
+    GetCursorPos(&p);
+    POINT p2;
+    p2.x = leftWidth;
+    p2.y = 0;
+    ClientToScreen(HWindow, &p2);
+    p.x = p2.x;
+    SendMessage(ToolTipWindow.HWindow, TTM_TRACKPOSITION, 0, (LPARAM)(DWORD)MAKELONG(p.x + splitWidth + 2, p.y + 10));
+    UpdateWindow(HWindow);
+
+    if (DragFullWindows)
+    {
+        if (DragSplitX != leftWidth)
+        {
+            DragSplitX = leftWidth;
+            midSplitter.SplitPosition = midSplitter.DragSplitPosition;
+            LayoutWindows();
+        }
+    }
+    else
+    {
+        DrawSplitLine(HWindow, leftWidth, DragSplitX, r);
+        DragSplitX = leftWidth;
+    }
+
+    //        ti.hinst = HInstance;
+    //        ti.lpszText = LPSTR_TEXTCALLBACK;
+    //        SendMessage(ToolTipWindow.HWindow, TTM_UPDATETIPTEXT, 0, (LPARAM)&ti);
+}
+
+BOOL CMainWindow::SplitBarDragEnd(BOOL leftButtonUp)
+{
+    if (HasLockedUI())
+        return FALSE;
+
+    if (DragMode != DragModeType::DRAG_MODE_MIDDLE)
+        return FALSE;
+    
+    RECT r;
+    GetClientRect(HWindow, &r);
+    RECT r2;
+    GetSplitRect(r2);
+    r2.left = r.left;
+    r2.right = r.right;
+    DrawSplitLine(HWindow, -1, DragSplitX, r2);
+    SendMessage(ToolTipWindow.HWindow, TTM_ACTIVATE, FALSE, 0);
+    DestroyWindow(ToolTipWindow.HWindow); // jen odpoji toolTip od objektu
+    if (leftButtonUp)
+    {
+        // pouze pri legalnim potrvrzeni prijmeme umisteni
+        //          int splitWidth = MainWindow->GetSplitBarWidth();
+        //          SplitPosition = (double)DragSplitX / (WindowWidth - splitWidth);
+        midSplitter.SplitPosition = midSplitter.DragSplitPosition;
+        LayoutWindows();
+    }
+    DragMode = DRAG_MODE_OFF;
+    ReleaseCapture();
+    FocusPanel(GetActivePanel());
+    EndStopIconRepaint(TRUE); // uvolnime prekreslovani ikon a nechame je prekreslit
+    if (!DragFullWindows)
+        EndStopStatusbarRepaint(); // uvolnime prekreslovani throbberu, pokud tahame xorovany splitbar
+    return TRUE;
+}
+
+BOOL CMainWindow::HorizSplitBarDragBegin(POINT p, BOOL leftButtonDown, BOOL leftButtonClick)
+{
+    if (HasLockedUI())
+        return FALSE;
+
+    RECT r;
+    Splitter* splitter = NULL;
+    if (GetLeftHorizSplitRect(r) && PtInRect(&r, p))
+    {
+        if (leftButtonDown) 
+        {
+            DragMode = DRAG_MODE_LEFT;
+        }
+        splitter = &leftSplitter;
+    }
+    else if (GetRightHorizSplitRect(r) && PtInRect(&r, p))
+    {
+        if (leftButtonDown)
+        {
+            DragMode = DRAG_MODE_RIGHT;
+        }
+        splitter = &rightSplitter;
+    } 
+    else
+    {
+        return FALSE;
+    }
+
+    
+    if (leftButtonDown) // klik -> pocatek tazeni
+    {
+        UpdateWindow(HWindow);        // pokud je Salamander dole, nechame prekreslit vsechna okna
+        MainWindow->CancelPanelsUI(); // cancel QuickSearch and QuickEdit
+        BeginStopIconRepaint();       // neprejeme si zadne repainty ikon
+        if (!DragFullWindows)
+            BeginStopStatusbarRepaint(); // neprejeme si prekreslovani throbberu, pokud tahame xorovany splitbar
+
+            
+        splitter->DragAnchor = p.y - r.top;
+        SetCapture(HWindow);
+
+        HWND toolTip = CreateWindowEx(0,
+                                        TOOLTIPS_CLASS,
+                                        NULL,
+                                        TTS_ALWAYSTIP | TTS_NOPREFIX,
+                                        CW_USEDEFAULT,
+                                        CW_USEDEFAULT,
+                                        CW_USEDEFAULT,
+                                        CW_USEDEFAULT,
+                                        NULL,
+                                        NULL,
+                                        HInstance,
+                                        NULL);
+        ToolTipWindow.AttachToWindow(toolTip);
+        ToolTipWindow.SetToolWindow(HWindow);
+        TOOLINFO ti;
+        ti.cbSize = sizeof(TOOLINFO);
+        ti.uFlags = TTF_SUBCLASS | TTF_ABSOLUTE | TTF_TRACK;
+        ti.hwnd = HWindow;
+        ti.uId = 1;
+        GetClientRect(HWindow, &ti.rect);
+        ti.hinst = HInstance;
+        ti.lpszText = LPSTR_TEXTCALLBACK;
+        SendMessage(ToolTipWindow.HWindow, TTM_ADDTOOL, 0, (LPARAM)&ti);
+
+        int splitHeight = GetHorizSplitBarHeight();
+        splitter->DragSplitPosition = splitter->SplitPosition;
+        POINT mp;
+        GetCursorPos(&mp);
+        POINT p2;
+        p2.x = (r.right-r.left)/2;
+        p2.y = r.top;
+        ClientToScreen(HWindow, &p2);
+        mp.y = p2.y;
+        SendMessage(ToolTipWindow.HWindow, TTM_TRACKPOSITION, 0, (LPARAM)(DWORD)MAKELONG(mp.x + 10, mp.y + splitHeight + 2));
+        SendMessage(ToolTipWindow.HWindow, TTM_TRACKACTIVATE, TRUE, (LPARAM)&ti);
+
+        if (DragMode == DragModeType::DRAG_MODE_LEFT)
+            GetLeftHorizSplitRect(r);
+        else
+            GetRightHorizSplitRect(r);
+
+        DragSplitY = p.y - splitter->DragAnchor;
+        DrawHorizontalSplitLine(HWindow, DragSplitY, -1, r); 
+        return TRUE;
+    }
+
+    if (leftButtonClick)
+    {
+        if (splitter->SplitPosition != 0.5)
+        {
+            splitter->SplitPosition = 0.5;
+            LayoutWindows();
+            FocusPanel(GetActivePanel());
+        }
+        return TRUE;
+    }
+    
+
+    return FALSE;
+}
+
+void CMainWindow::HorizSplitBarDragMove(POINT p)
+{
+    if (HasLockedUI())
+        return;
+
+    int offset = TopRebarHeight;
+        
+    RECT r;
+    Splitter* splitter = NULL;
+    if (DragMode == DragModeType::DRAG_MODE_LEFT)
+    {
+        splitter = &leftSplitter;
+        GetLeftHorizSplitRect(r);
+    }
+    else if (DragMode == DragModeType::DRAG_MODE_RIGHT)
+    {
+        splitter = &rightSplitter;
+        GetRightHorizSplitRect(r);
+    }
+    else
+    {
+        return;
+    }
+        
+    p.y -= offset;
+    p.y = clampDown(p.y, 0);
+
+    int splitHeight = MainWindow->GetHorizSplitBarHeight();
+
+    // zarazka na stredu
+    double splitPosition = (double)(p.y - splitter->DragAnchor) / (PanelsTotalHeight - splitHeight);
+    if (splitPosition >= 0.49 && splitPosition <= 0.51)
+    {
+        p.y = (PanelsTotalHeight - splitHeight) / 2 + splitter->DragAnchor;
+        splitPosition = 0.5;
+    }
+    splitPosition = clamp(splitPosition, 0.0, 1.0);
+
+    int leftHeight = p.y - splitter->DragAnchor;
+    if (leftHeight < MIN_WIN_HEIGHT + 1)
+        leftHeight = MIN_WIN_HEIGHT + 1;
+    int rightHeight = PanelsTotalHeight - 2 - leftHeight - splitHeight;
+    if (rightHeight < MIN_WIN_HEIGHT - 1)
+    {
+        rightHeight = MIN_WIN_HEIGHT - 1;
+        leftHeight = PanelsTotalHeight - 2 - splitHeight - rightHeight;
+    }
+
+    leftHeight += offset;
+    leftHeight = clampUp(leftHeight, PanelsTotalHeight + offset);
+
+    TOOLINFO ti;
+    ti.cbSize = sizeof(TOOLINFO);
+    ti.uFlags = 0;
+    ti.hwnd = HWindow;
+    ti.uId = 1;
+    GetClientRect(HWindow, &ti.rect);
+
+    splitter->DragSplitPosition = splitPosition;
+
+    //POINT p;
+    GetCursorPos(&p);
+    POINT p2;
+    p2.x = 0;
+    p2.y = leftHeight;
+    ClientToScreen(HWindow, &p2);
+    p.y = p2.y;
+    SendMessage(ToolTipWindow.HWindow, TTM_TRACKPOSITION, 0, (LPARAM)(DWORD)MAKELONG(p.x + 10, p.y + splitHeight + 2));
+    UpdateWindow(HWindow);
+
+    if (DragFullWindows)
+    {
+        if (DragSplitY != leftHeight)
+        {
+            DragSplitY = leftHeight;
+            splitter->SplitPosition = splitter->DragSplitPosition;
+            LayoutWindows();
+        }
+    }
+    else
+    {
+        DrawHorizontalSplitLine(HWindow, leftHeight, DragSplitY, r);
+        DragSplitY = leftHeight;
+    }
+}
+
+BOOL CMainWindow::HorizSplitBarDragEnd(BOOL leftButtonUp)
+{
+    if (HasLockedUI())
+        return FALSE;
+
+    RECT r;
+    RECT r2;
+    Splitter* splitter = NULL;
+    if (DragMode == DragModeType::DRAG_MODE_LEFT)
+    {
+        splitter = &leftSplitter;
+        GetLeftHorizSplitRect(r2);
+    }
+    else if (DragMode == DragModeType::DRAG_MODE_RIGHT)
+    {
+        splitter = &rightSplitter;
+        GetRightHorizSplitRect(r2);
+    }
+    else
+    {
+        return FALSE;
+    }
+        
+    GetClientRect(HWindow, &r); //  this can be wrong
+    //r2.top = TopRebarHeight;
+    //r2.left = r.left;
+    //r2.right = r.right;
+    //r2.bottom = r2.top + PanelsTotalHeight;
+    DrawHorizontalSplitLine(HWindow, -1, DragSplitY, r2);
+    SendMessage(ToolTipWindow.HWindow, TTM_ACTIVATE, FALSE, 0);
+    DestroyWindow(ToolTipWindow.HWindow); // jen odpoji toolTip od objektu
+    if (leftButtonUp)
+    {
+        splitter->SplitPosition = splitter->DragSplitPosition;
+        LayoutWindows();
+    }
+    DragMode = DRAG_MODE_OFF;
+    ReleaseCapture();
+    FocusPanel(GetActivePanel());
+    EndStopIconRepaint(TRUE); // uvolnime prekreslovani ikon a nechame je prekreslit
+    if (!DragFullWindows)
+        EndStopStatusbarRepaint(); // uvolnime prekreslovani throbberu, pokud tahame xorovany splitbar
+    return TRUE;
+}
+
+
 //****************************************************************************
 //
 // CMainWindow
@@ -59,6 +490,10 @@ void CMainWindow::DirHistoryAddPathUnique(int type, const char* pathOrArchiveOrF
             LeftPanel->DirectoryLine->SetHistory(DirHistory->HasPaths());
         if (RightPanel != NULL)
             RightPanel->DirectoryLine->SetHistory(DirHistory->HasPaths());
+        if (BottomLeftPanel != NULL)
+            BottomLeftPanel->DirectoryLine->SetHistory(DirHistory->HasPaths());
+        if (BottomRightPanel != NULL)
+            BottomRightPanel->DirectoryLine->SetHistory(DirHistory->HasPaths());
     }
     else
     {
@@ -96,14 +531,38 @@ void CMainWindow::DirHistoryRemoveActualPath(CFilesWindow* panel)
         LeftPanel->DirectoryLine->SetHistory(DirHistory->HasPaths());
     if (RightPanel != NULL)
         RightPanel->DirectoryLine->SetHistory(DirHistory->HasPaths());
+    if (BottomLeftPanel != NULL)
+        BottomLeftPanel->DirectoryLine->SetHistory(DirHistory->HasPaths());
+    if (BottomRightPanel != NULL)
+        BottomRightPanel->DirectoryLine->SetHistory(DirHistory->HasPaths());
 }
 
 void CMainWindow::GetSplitRect(RECT& r)
 {
-    r.left = SplitPositionPix;
+    r.left = midSplitter.SplitPositionPix;
     r.top = TopRebarHeight;
-    r.right = SplitPositionPix + MainWindow->GetSplitBarWidth();
+    r.right = midSplitter.SplitPositionPix + MainWindow->GetSplitBarWidth();
     r.bottom = WindowHeight - EditHeight - BottomToolBarHeight;
+}
+
+BOOL CMainWindow::GetLeftHorizSplitRect(RECT& r)
+{
+    r.left = 1;
+    r.top = TopRebarHeight + leftSplitter.SplitPositionPix;
+    r.right = midSplitter.SplitPositionPix;
+    r.bottom = r.top + GetHorizSplitBarHeight();
+
+    return true;
+}
+
+BOOL CMainWindow::GetRightHorizSplitRect(RECT& r)
+{
+    r.left = midSplitter.SplitPositionPix + MainWindow->GetSplitBarWidth();
+    r.top = TopRebarHeight + rightSplitter.SplitPositionPix;
+    r.right = WindowWidth;
+    r.bottom = r.top + GetHorizSplitBarHeight();
+
+    return TRUE;
 }
 
 void CMainWindow::GetWindowSplitRect(RECT& r)
@@ -168,6 +627,10 @@ BOOL CMainWindow::CanUnloadPlugin(HWND parent, CPluginInterfaceAbstract* plugin)
     if (LeftPanel != NULL && !LeftPanel->CanUnloadPlugin(parent, plugin))
         return FALSE;
     if (RightPanel != NULL && !RightPanel->CanUnloadPlugin(parent, plugin))
+        return FALSE;
+    if (BottomLeftPanel != NULL && !BottomLeftPanel->CanUnloadPlugin(parent, plugin))
+        return FALSE;
+    if (BottomRightPanel != NULL && !BottomRightPanel->CanUnloadPlugin(parent, plugin))
         return FALSE;
 
     // najdeme odpojene FS patrici plug-inu 'plugin' a zkusime je zavrit
@@ -1138,9 +1601,10 @@ BOOL CMainWindow::HandleCtrlLetter(char c)
         case 'T':
             cmd = CM_AFOCUSSHORTCUT;
             break;
-        case 'U':
+            //  ctrl+U doesnt work anymore
+        /*case 'U':
             cmd = CM_SWAPPANELS;
-            break;
+            break;*/
         case 'V':
             cmd = CM_CLIPPASTE;
             break;
@@ -1156,7 +1620,7 @@ BOOL CMainWindow::HandleCtrlLetter(char c)
     return TRUE;
 }
 
-void CMainWindow::ChangePanel(BOOL force)
+void CMainWindow::ChangePanel(CFilesWindow* newActivePanel, BOOL force)
 {
     CALL_STACK_MESSAGE1("CMainWindow::ChangePanel()");
 
@@ -1165,7 +1629,10 @@ void CMainWindow::ChangePanel(BOOL force)
         return;
 
     CFilesWindow* p1 = GetActivePanel();
-    CFilesWindow* p2 = GetNonActivePanel();
+    CFilesWindow* p2 = newActivePanel; //GetNonActivePanel();
+
+    if (p1 == p2)
+        return;
 
     BOOL change = FALSE;
     if (force || p2->CanBeFocused())
@@ -1173,12 +1640,12 @@ void CMainWindow::ChangePanel(BOOL force)
     else
     {
         // pokud je panel ZOOMed, minimalizujeme ho a ZOOMneme ten druhy
-        if (IsPanelZoomed(TRUE) || IsPanelZoomed(FALSE))
+        //  not sure about the above notice... test...
+        CFilesWindow* zoomedPanel = GetZoomedPanel();
+        if (zoomedPanel == p1)
         {
-            if (IsPanelZoomed(TRUE))
-                SplitPosition = 0.0;
-            else
-                SplitPosition = 1.0;
+            RestoreZoomedPanel(p1);
+            ZoomPanel(p2);
             LayoutWindows();
             change = TRUE;
         }
@@ -1218,7 +1685,7 @@ void CMainWindow::ChangePanel(BOOL force)
         MainWindow->UpdateDefaultDir(TRUE);
 
         // rozesleme tu novinu do vsech naloadenejch pluginu
-        Plugins.Event(PLUGINEVENT_PANELACTIVATED, p2 == LeftPanel ? PANEL_LEFT : PANEL_RIGHT);
+        Plugins.Event(PLUGINEVENT_PANELACTIVATED, GetPanelId(p2));
     }
 }
 
@@ -1228,7 +1695,7 @@ void CMainWindow::FocusPanel(CFilesWindow* focus, BOOL testIfMainWndActive)
     MainWindow->CancelPanelsUI(); // cancel QuickSearch and QuickEdit
 
     if (!IsIconic(HWindow) && !focus->CanBeFocused())
-        focus = ((focus == LeftPanel) ? RightPanel : LeftPanel);
+        focus = GetOtherPanel(focus); // kamen, old:((focus == LeftPanel) ? RightPanel : LeftPanel);
 
     if (GetFocus() != focus->GetListBoxHWND())
     {
@@ -1259,10 +1726,11 @@ void CMainWindow::FocusPanel(CFilesWindow* focus, BOOL testIfMainWndActive)
         if (focus->DirectoryLine != NULL)
             focus->DirectoryLine->InvalidateAndUpdate(FALSE);
         //    ReleaseMenuNew();
-        EditWindowSetDirectory();
+        EditWindowSetDirectory();DWORD
         IdleRefreshStates = TRUE; // pri pristim Idle vynutime kontrolu stavovych promennych
         // rozesleme tu novinu do naloadenejch pluginu
-        Plugins.Event(PLUGINEVENT_PANELACTIVATED, focus == LeftPanel ? PANEL_LEFT : PANEL_RIGHT);
+                
+        Plugins.Event(PLUGINEVENT_PANELACTIVATED, GetPanelId(focus));
     }
     //---  obnova DefaultDir
     MainWindow->UpdateDefaultDir(TRUE);
@@ -1531,6 +1999,14 @@ CMainWindow::MapClientArea(POINT point)
     case mwhteSplitLine:
         dwContext = IDH_SPLITBAR;
         break;
+    
+    case mwhteLeftHorizSplitLine:
+        dwContext = IDH_LEFT_HORIZ_SPLITBAR;
+        break;
+
+    case mwhteRightHorizSplitLine:
+        dwContext = IDH_RIGHT_HORIZ_SPLITBAR;
+        break;
 
     case mwhteLeftDirLine:
     {
@@ -1552,18 +2028,44 @@ CMainWindow::MapClientArea(POINT point)
         break;
     }
 
+    case mwhteBottomLeftDirLine:
+    {
+        dwContext = IDH_DIRECTORYLINE;
+
+        if (BottomLeftPanel->DirectoryLine->ToolBar != NULL &&
+            BottomLeftPanel->DirectoryLine->ToolBar->HWindow != NULL)
+            toolbar = BottomLeftPanel->DirectoryLine->ToolBar;
+        break;
+    }
+
+    case mwhteBottomRightDirLine:
+    {
+        dwContext = IDH_DIRECTORYLINE;
+
+        if (BottomRightPanel->DirectoryLine->ToolBar != NULL &&
+            BottomRightPanel->DirectoryLine->ToolBar->HWindow != NULL)
+            toolbar = BottomRightPanel->DirectoryLine->ToolBar;
+        break;
+    }
+
     case mwhteLeftHeaderLine:
     case mwhteRightHeaderLine:
+    case mwhteBottomLeftHeaderLine:
+    case mwhteBottomRightHeaderLine:
         dwContext = IDH_HEADERLINE;
         break;
 
     case mwhteLeftStatusLine:
     case mwhteRightStatusLine:
+    case mwhteBottomLeftStatusLine:
+    case mwhteBottomRightStatusLine:
         dwContext = IDH_INFOLINE;
         break;
 
     case mwhteLeftWorkingArea:
     case mwhteRightWorkingArea:
+    case mwhteBottomLeftWorkingArea:
+    case mwhteBottomRightWorkingArea:
         dwContext = IDH_WORKINGAREA;
         break;
     }
@@ -1966,8 +2468,22 @@ void CMainWindow::UpdateDriveBars()
     }
     else
     {
-        DriveBar->SetCheckedDrive(LeftPanel);
-        DriveBar2->SetCheckedDrive(RightPanel);
+
+        
+            
+        CFilesWindow* active = GetActivePanel();
+        CFilesWindow* other = GetOtherPanel(active);
+
+        if (active->IsLeftPanel())
+        {
+            DriveBar->SetCheckedDrive(active);
+            DriveBar2->SetCheckedDrive(other);
+        }
+        else
+        {
+            DriveBar->SetCheckedDrive(other);
+            DriveBar2->SetCheckedDrive(active);
+        }
     }
 }
 
@@ -1975,11 +2491,14 @@ void CMainWindow::CancelPanelsUI()
 {
     LeftPanel->CancelUI();
     RightPanel->CancelUI();
+    
+    BottomLeftPanel->CancelUI();
+    BottomRightPanel->CancelUI();
 }
 
 BOOL CMainWindow::QuickRenameWindowActive()
 {
-    return (LeftPanel->IsQuickRenameActive() || RightPanel->IsQuickRenameActive());
+    return (LeftPanel->IsQuickRenameActive() || RightPanel->IsQuickRenameActive()) || (BottomLeftPanel->IsQuickRenameActive() || BottomRightPanel->IsQuickRenameActive());
 }
 
 BOOL CMainWindow::DoQuickRename()
@@ -1988,6 +2507,10 @@ BOOL CMainWindow::DoQuickRename()
         return LeftPanel->HandeQuickRenameWindowKey(VK_RETURN);
     if (RightPanel->IsQuickRenameActive())
         return RightPanel->HandeQuickRenameWindowKey(VK_RETURN);
+    if (BottomLeftPanel->IsQuickRenameActive())
+        return BottomLeftPanel->HandeQuickRenameWindowKey(VK_RETURN);
+    if (BottomRightPanel->IsQuickRenameActive())
+        return BottomRightPanel->HandeQuickRenameWindowKey(VK_RETURN);
     return TRUE; // OK
 }
 
@@ -2031,6 +2554,8 @@ void CMainWindow::LockUI(BOOL lock, HWND hToolWnd, const char* lockReason)
         EnableWindow(BottomToolBar->HWindow, !lock);
     LeftPanel->LockUI(lock);
     RightPanel->LockUI(lock);
+    BottomLeftPanel->LockUI(lock);
+    BottomRightPanel->LockUI(lock);
 }
 
 void CMainWindow::BringLockedUIToolWnd()
@@ -2054,6 +2579,10 @@ CMainWindow::GetPanel(int panel)
         return LeftPanel;
     case PANEL_RIGHT:
         return RightPanel;
+    case PANEL_BOTTOM_LEFT:
+        return BottomLeftPanel;
+    case PANEL_BOTTOM_RIGHT:
+        return BottomRightPanel;
     default:
         TRACE_E("Invalid panel (PANEL_XXX) constant: " << panel);
         return NULL;

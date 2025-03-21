@@ -104,7 +104,7 @@ int MyEntryPoint()
         ret = WinMainCRTStartup();
     }
     else
-        MessageBox(NULL, "Open Salamander Bug Reporter (salmon.exe) initialization has failed. Please reinstall Open Salamander.",
+        MessageBox(NULL, "Quad Salamander Bug Reporter (salmon.exe) initialization has failed. Please reinstall Open Salamander.",
                    SALAMANDER_TEXT_VERSION, MB_OK | MB_ICONSTOP);
 
     // sem uz mi debugger nechodi, sestreli nas v RTL (testovano pod VC 2008 s nasim RTL)
@@ -142,6 +142,7 @@ BOOL Windows7AndLater = FALSE;     // JRYFIXME - zrusit
 BOOL Windows8AndLater = FALSE;
 BOOL Windows8_1AndLater = FALSE;
 BOOL Windows10AndLater = FALSE;
+BOOL Windows11AndLater = FALSE;
 
 BOOL Windows64Bit = FALSE;
 
@@ -194,6 +195,10 @@ BOOL ChangeLeftPanelToFixedWhenIdleInProgress = FALSE; // TRUE = prave se meni c
 BOOL ChangeLeftPanelToFixedWhenIdle = FALSE;
 BOOL ChangeRightPanelToFixedWhenIdleInProgress = FALSE; // TRUE = prave se meni cesta, nastaveni ChangeRightPanelToFixedWhenIdle na TRUE je zbytecne
 BOOL ChangeRightPanelToFixedWhenIdle = FALSE;
+BOOL ChangeBottomLeftPanelToFixedWhenIdleInProgress = FALSE; // TRUE = prave se meni cesta, nastaveni ChangeLeftPanelToFixedWhenIdle na TRUE je zbytecne
+BOOL ChangeBottomLeftPanelToFixedWhenIdle = FALSE;
+BOOL ChangeBottomRightPanelToFixedWhenIdleInProgress = FALSE; // TRUE = prave se meni cesta, nastaveni ChangeRightPanelToFixedWhenIdle na TRUE je zbytecne
+BOOL ChangeBottomRightPanelToFixedWhenIdle = FALSE;
 BOOL OpenCfgToChangeIfPathIsInaccessibleGoTo = FALSE; // TRUE = v idle otevre konfiguraci na Drives a focusne "If path in panel is inaccessible, go to:"
 
 char IsSLGIncomplete[ISSLGINCOMPLETE_SIZE]; // pokud je retezec prazdny, SLG je kompletne prelozene; jinak obsahuje URL na forum do sekce daneho jazyka
@@ -212,7 +217,7 @@ const char* SALCF_FAKE_REALPATH = "SalFakeRealPath";
 const char* SALCF_FAKE_SRCTYPE = "SalFakeSrcType";
 const char* SALCF_FAKE_SRCFSPATH = "SalFakeSrcFSPath";
 
-const char* MAINWINDOW_NAME = "Open Salamander";
+const char* MAINWINDOW_NAME = "Quad Salamander";
 const char* CMAINWINDOW_CLASSNAME = "SalamanderMainWindowVer25";
 const char* SAVEBITS_CLASSNAME = "SalamanderSaveBits";
 const char* SHELLEXECUTE_CLASSNAME = "SalamanderShellExecute";
@@ -382,6 +387,8 @@ DWORD EnablerBackward = FALSE;
 DWORD EnablerFileOnDisk = FALSE;
 DWORD EnablerLeftFileOnDisk = FALSE;
 DWORD EnablerRightFileOnDisk = FALSE;
+DWORD EnablerBottomLeftFileOnDisk = FALSE;
+DWORD EnablerBottomRightFileOnDisk = FALSE;
 DWORD EnablerFileOnDiskOrArchive = FALSE;
 DWORD EnablerFileOrDirLinkOnDisk = FALSE;
 DWORD EnablerFiles = FALSE;
@@ -421,10 +428,20 @@ DWORD EnablerLeftForward = FALSE;
 DWORD EnablerRightForward = FALSE;
 DWORD EnablerLeftBackward = FALSE;
 DWORD EnablerRightBackward = FALSE;
+DWORD EnablerBottomLeftUpDir = FALSE;
+DWORD EnablerBottomRightUpDir = FALSE;
+DWORD EnablerBottomLeftRootDir = FALSE;
+DWORD EnablerBottomRightRootDir = FALSE;
+DWORD EnablerBottomLeftForward = FALSE;
+DWORD EnablerBottomRightForward = FALSE;
+DWORD EnablerBottomLeftBackward = FALSE;
+DWORD EnablerBottomRightBackward = FALSE;
 DWORD EnablerFileHistory = FALSE;
 DWORD EnablerDirHistory = FALSE;
 DWORD EnablerCustomizeLeftView = FALSE;
 DWORD EnablerCustomizeRightView = FALSE;
+DWORD EnablerCustomizeBottomLeftView = FALSE;
+DWORD EnablerCustomizeBottomRightView = FALSE;
 DWORD EnablerDriveInfo = FALSE;
 DWORD EnablerCreateDir = FALSE;
 DWORD EnablerViewFile = FALSE;
@@ -3393,6 +3410,29 @@ BOOL ParseCommandLineParameters(LPSTR cmdLine, CCommandLineParams* cmdLineParams
                 }
             }
 
+            
+
+            // todo:: add -bl, -br command line options somehow...
+            if (StrICmp(argv[i], "-bl") == 0) // bottom left panel path
+            {
+                if (i + 1 < p)
+                {
+                    GetCommandLineParamExpandEnvVars(argv[i + 1], cmdLineParams->BottomLeftPath, 2 * MAX_PATH, FALSE);
+                    i++;
+                    continue;
+                }
+            }
+
+            if (StrICmp(argv[i], "-br") == 0) // bottom right panel path
+            {
+                if (i + 1 < p)
+                {
+                    GetCommandLineParamExpandEnvVars(argv[i + 1], cmdLineParams->BottomRightPath, 2 * MAX_PATH, FALSE);
+                    i++;
+                    continue;
+                }
+            }
+
             if (StrICmp(argv[i], "-a") == 0) // active panel path
             {
                 if (i + 1 < p)
@@ -3665,6 +3705,7 @@ int WinMainBody(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR cmdLine,
     Windows8AndLater = SalIsWindowsVersionOrGreater(6, 2, 0);
     Windows8_1AndLater = SalIsWindowsVersionOrGreater(6, 3, 0);
     Windows10AndLater = SalIsWindowsVersionOrGreater(10, 0, 0);
+    Windows11AndLater = SalIsWindowsVersionOrGreater(10, 22000, 0);     //  not verified
 
     DWORD integrityLevel;
     if (GetProcessIntegrityLevel(&integrityLevel) && integrityLevel >= SECURITY_MANDATORY_HIGH_RID)
@@ -3828,9 +3869,9 @@ FIND_NEW_SLG_FILE:
         else // nemelo by vubec nastat - .SLG soubor jiz byl otestovan
         {
             sprintf(errorText, "File %s was not found or is not valid language file.\n"
-                               "Please run Open Salamander again and try to choose some other language file.",
+                               "Please run Quad Salamander again and try to choose some other language file.",
                     path);
-            MessageBox(NULL, errorText, "Open Salamander", MB_OK | MB_ICONERROR);
+            MessageBox(NULL, errorText, "Quad Salamander", MB_OK | MB_ICONERROR);
             goto EXIT_1a;
         }
     }
@@ -4192,6 +4233,10 @@ FIND_NEW_SLG_FILE:
                     MainWindow->RightPanel->UpdateDriveIcon(TRUE);
                     MainWindow->LeftPanel->UpdateFilterSymbol();
                     MainWindow->RightPanel->UpdateFilterSymbol();
+                    MainWindow->BottomLeftPanel->UpdateDriveIcon(TRUE);
+                    MainWindow->BottomRightPanel->UpdateDriveIcon(TRUE);
+                    MainWindow->BottomLeftPanel->UpdateFilterSymbol();
+                    MainWindow->BottomRightPanel->UpdateFilterSymbol();
                     if (!SystemPolicies.GetNoRun())
                         SendMessage(MainWindow->HWindow, WM_COMMAND, CM_TOGGLEEDITLINE, TRUE);
                     MainWindow->SetWindowIcon();
@@ -4338,6 +4383,8 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
                     // uzivatele chteji mit start-up cestu v historii i v pripade, ze ji neuspinili
                     MainWindow->LeftPanel->UserWorkedOnThisPath = TRUE;
                     MainWindow->RightPanel->UserWorkedOnThisPath = TRUE;
+                    MainWindow->BottomLeftPanel->UserWorkedOnThisPath = TRUE;
+                    MainWindow->BottomRightPanel->UserWorkedOnThisPath = TRUE;
 
                     // dame seznamu procesu vedet, ze bezime a mame hlavni okno (je mozne nas aktivovat pri OnlyOneInstance)
                     TaskList.SetProcessState(PROCESS_STATE_RUNNING, MainWindow->HWindow);
@@ -4426,7 +4473,7 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
                                         HWND hParent = NULL;
                                         if (MainWindow != NULL)
                                             hParent = MainWindow->HWindow;
-                                        MessageBox(hParent, "_CrtCheckMemory failed. Look to the Trace Server for details.", "Open Salamander", MB_OK | MB_ICONERROR);
+                                        MessageBox(hParent, "_CrtCheckMemory failed. Look to the Trace Server for details.", "Quad Salamander", MB_OK | MB_ICONERROR);
                                     }
                                     LastCrtCheckMemoryTime = GetTickCount();
                                 }
@@ -4492,6 +4539,22 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
                                     if (MainWindow != NULL && MainWindow->RightPanel != NULL)
                                         MainWindow->RightPanel->ChangeToRescuePathOrFixedDrive(MainWindow->RightPanel->HWindow);
                                     ChangeRightPanelToFixedWhenIdleInProgress = FALSE;
+                                }
+                                if (!SalamanderBusy && ChangeBottomLeftPanelToFixedWhenIdle)
+                                {
+                                    ChangeBottomLeftPanelToFixedWhenIdle = FALSE;
+                                    ChangeBottomLeftPanelToFixedWhenIdleInProgress = TRUE;
+                                    if (MainWindow != NULL && MainWindow->BottomLeftPanel != NULL)
+                                        MainWindow->BottomLeftPanel->ChangeToRescuePathOrFixedDrive(MainWindow->BottomLeftPanel->HWindow);
+                                    ChangeBottomLeftPanelToFixedWhenIdleInProgress = FALSE;
+                                }
+                                if (!SalamanderBusy && ChangeBottomRightPanelToFixedWhenIdle)
+                                {
+                                    ChangeBottomRightPanelToFixedWhenIdle = FALSE;
+                                    ChangeBottomRightPanelToFixedWhenIdleInProgress = TRUE;
+                                    if (MainWindow != NULL && MainWindow->BottomRightPanel != NULL)
+                                        MainWindow->BottomRightPanel->ChangeToRescuePathOrFixedDrive(MainWindow->BottomRightPanel->HWindow);
+                                    ChangeBottomRightPanelToFixedWhenIdleInProgress = FALSE;
                                 }
                                 if (!SalamanderBusy && OpenCfgToChangeIfPathIsInaccessibleGoTo)
                                 {

@@ -1374,7 +1374,7 @@ void CSalamanderGeneral::ChangePanel()
         TRACE_E("You can call CSalamanderGeneral::ChangePanel() only from main thread!");
         return;
     }
-    MainWindow->ChangePanel();
+    MainWindow->ChangePanel(MainWindow->GetNextPanel(MainWindow->GetActivePanel()));
 }
 
 void CSalamanderGeneral::SkipOneActivateRefresh()

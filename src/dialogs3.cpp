@@ -1247,10 +1247,17 @@ void CDriveInfo::Validate(CTransferInfo& ti)
             SalPathAddBackslash(volumePathWithBackslash, MAX_PATH);
             BOOL handsOffLeft = SalPathIsPrefix(volumePathWithBackslash, MainWindow->LeftPanel->GetPath());
             BOOL handsOffRight = SalPathIsPrefix(volumePathWithBackslash, MainWindow->RightPanel->GetPath());
+            BOOL handsOffBottomLeft = SalPathIsPrefix(volumePathWithBackslash, MainWindow->BottomLeftPanel->GetPath());
+            BOOL handsOffBottomRight = SalPathIsPrefix(volumePathWithBackslash, MainWindow->BottomRightPanel->GetPath());
             if (handsOffLeft)
                 MainWindow->LeftPanel->HandsOff(TRUE);
             if (handsOffRight)
                 MainWindow->RightPanel->HandsOff(TRUE);
+            if (handsOffBottomLeft)
+                MainWindow->BottomLeftPanel->HandsOff(TRUE);
+            if (handsOffBottomRight)
+                MainWindow->BottomRightPanel->HandsOff(TRUE);
+
             //      SAD_SetUACParentWindow(HWindow);
             //      BOOL res = SAD_SetVolumeLabel(volumePathWithBackslash, newName);
             //      DWORD err = SAD_GetLastError();
@@ -1260,6 +1267,11 @@ void CDriveInfo::Validate(CTransferInfo& ti)
                 MainWindow->LeftPanel->HandsOff(FALSE);
             if (handsOffRight)
                 MainWindow->RightPanel->HandsOff(FALSE);
+            if (handsOffBottomLeft)
+                MainWindow->BottomLeftPanel->HandsOff(FALSE);
+            if (handsOffBottomRight)
+                MainWindow->BottomRightPanel->HandsOff(FALSE);
+
             if (!res)
             {
                 char buf[MAX_PATH + 100];
@@ -2471,7 +2483,7 @@ HWND CWaitWindow::Create(HWND hForegroundWnd)
 
     CreateEx(WS_EX_DLGMODALFRAME | WS_EX_TOOLWINDOW,
              SAVEBITS_CLASSNAME,
-             Caption == NULL ? "Open Salamander" : Caption,
+             Caption == NULL ? "Quad Salamander" : Caption,
              WS_BORDER | WS_OVERLAPPED | (ShowCloseButton ? WS_SYSMENU : 0),
              0, 0, width, height,
              HParent,

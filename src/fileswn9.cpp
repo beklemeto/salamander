@@ -32,20 +32,26 @@ CColumDataItem StdColumnsPrivate[STANDARD_COLUMNS_COUNT] =
         /*2*/ {VIEW_SHOW_DOSNAME, IDS_COLUMN_NAME_DOSNAME, IDS_COLUMN_DESC_DOSNAME, InternalGetDosName, 0, 1, COLUMN_ID_DOSNAME},
         /*3*/ {VIEW_SHOW_SIZE, IDS_COLUMN_NAME_SIZE, IDS_COLUMN_DESC_SIZE, InternalGetSize, 1, 0, COLUMN_ID_SIZE},
         /*4*/ {VIEW_SHOW_TYPE, IDS_COLUMN_NAME_TYPE, IDS_COLUMN_DESC_TYPE, InternalGetType, 0, 1, COLUMN_ID_TYPE},
-        /*5*/ {VIEW_SHOW_DATE, IDS_COLUMN_NAME_DATE, IDS_COLUMN_DESC_DATE, NULL /* viz nize */, 1, 0, COLUMN_ID_DATE},
-        /*6*/ {VIEW_SHOW_TIME, IDS_COLUMN_NAME_TIME, IDS_COLUMN_DESC_TIME, NULL /* viz nize */, 1, 0, COLUMN_ID_TIME},
-        /*7*/ {VIEW_SHOW_ATTRIBUTES, IDS_COLUMN_NAME_ATTR, IDS_COLUMN_DESC_ATTR, InternalGetAttr, 1, 0, COLUMN_ID_ATTRIBUTES},
-        /*8*/ {VIEW_SHOW_DESCRIPTION, IDS_COLUMN_NAME_DESC, IDS_COLUMN_DESC_DESC, InternalGetDescr, 0, 1, COLUMN_ID_DESCRIPTION},
+        /*5*/ {VIEW_SHOW_AGE, IDS_COLUMN_NAME_AGE, IDS_COLUMN_DESC_AGE, NULL /* viz nize */, 1, 0, COLUMN_ID_AGE},
+        /*6*/ {VIEW_SHOW_DATE, IDS_COLUMN_NAME_DATE, IDS_COLUMN_DESC_DATE, NULL /* viz nize */, 1, 0, COLUMN_ID_DATE},
+        /*7*/ {VIEW_SHOW_TIME, IDS_COLUMN_NAME_TIME, IDS_COLUMN_DESC_TIME, NULL /* viz nize */, 1, 0, COLUMN_ID_TIME},
+        /*8*/ {VIEW_SHOW_ATTRIBUTES, IDS_COLUMN_NAME_ATTR, IDS_COLUMN_DESC_ATTR, InternalGetAttr, 1, 0, COLUMN_ID_ATTRIBUTES},
+        /*9*/ {VIEW_SHOW_DESCRIPTION, IDS_COLUMN_NAME_DESC, IDS_COLUMN_DESC_DESC, InternalGetDescr, 0, 1, COLUMN_ID_DESCRIPTION},
 };
 
 CColumDataItem* GetStdColumn(int i, BOOL isDisk)
 {
-    if (i == 5 /* date */)
-        StdColumnsPrivate[5].GetText = isDisk ? InternalGetDateOnlyForDisk : InternalGetDate; // na disku pouzivame 1.1.1602 0:00:00.000 jako prazdnou hodnotu (prazdne misto ve sloupci v panelu)
-    else
+    if (i == 5 /* age */)
     {
-        if (i == 6 /* time */)
-            StdColumnsPrivate[6].GetText = isDisk ? InternalGetTimeOnlyForDisk : InternalGetTime; // na disku pouzivame 1.1.1602 0:00:00.000 jako prazdnou hodnotu (prazdne misto ve sloupci v panelu)
+        StdColumnsPrivate[i].GetText = isDisk ? InternalGetAgeOnlyForDisk : InternalGetAge; // na disku pouzivame 1.1.1602 0:00:00.000 jako prazdnou hodnotu (prazdne misto ve sloupci v panelu)
+    }
+    else if (i == 6 /* date */)
+    {
+        StdColumnsPrivate[i].GetText = isDisk ? InternalGetDateOnlyForDisk : InternalGetDate; // na disku pouzivame 1.1.1602 0:00:00.000 jako prazdnou hodnotu (prazdne misto ve sloupci v panelu)
+    }
+    else if (i == 7 /* time */)
+    {
+        StdColumnsPrivate[i].GetText = isDisk ? InternalGetTimeOnlyForDisk : InternalGetTime; // na disku pouzivame 1.1.1602 0:00:00.000 jako prazdnou hodnotu (prazdne misto ve sloupci v panelu)
     }
     return &StdColumnsPrivate[i];
 }
@@ -71,7 +77,7 @@ BOOL CFilesWindow::ParsePath(char* path, int& type, BOOL& isDir, char*& secondPa
 int CFilesWindow::GetPanelCode()
 {
     CALL_STACK_MESSAGE_NONE
-    return (MainWindow != NULL && MainWindow->LeftPanel == this) ? PANEL_LEFT : PANEL_RIGHT;
+    return (MainWindow != NULL && GetWindowPanelType());
 }
 
 void CFilesWindow::ClearPluginFSFromHistory(CPluginFSInterfaceAbstract* fs)
@@ -340,7 +346,8 @@ BOOL CFilesWindow::ClipboardPaste(BOOL onlyLinks, BOOL onlyTest, const char* pas
                 MainWindow->PostChangeOnPathNotification(GetPath(), TRUE);
                 // postneme refreshe do obou panelu (pokud nejsou auto-refreshovane - tedy do panelu
                 // s FS to nedojde)
-                if (!MainWindow->LeftPanel->AutomaticRefresh || !MainWindow->RightPanel->AutomaticRefresh)
+                if (!MainWindow->LeftPanel->AutomaticRefresh || !MainWindow->RightPanel->AutomaticRefresh || 
+                    !MainWindow->BottomLeftPanel->AutomaticRefresh || !MainWindow->BottomRightPanel->AutomaticRefresh)
                 {
                     // dalsi 1/3 sekundy na provedeni operace nebo aspon jeji casti; aspon jeden panel
                     // je nerefreshovany - "vyplati" se utracet cas usera
@@ -349,6 +356,8 @@ BOOL CFilesWindow::ClipboardPaste(BOOL onlyLinks, BOOL onlyTest, const char* pas
                     HANDLES(EnterCriticalSection(&TimeCounterSection));
                     int t1 = MyTimeCounter++;
                     int t2 = MyTimeCounter++;
+                    int t3 = MyTimeCounter++;
+                    int t4 = MyTimeCounter++;
                     HANDLES(LeaveCriticalSection(&TimeCounterSection));
                     if (!MainWindow->LeftPanel->AutomaticRefresh)
                     {
@@ -357,6 +366,14 @@ BOOL CFilesWindow::ClipboardPaste(BOOL onlyLinks, BOOL onlyTest, const char* pas
                     if (!MainWindow->RightPanel->AutomaticRefresh)
                     {
                         PostMessage(MainWindow->RightPanel->HWindow, WM_USER_REFRESH_DIR, 0, t2);
+                    }
+                    if (!MainWindow->BottomLeftPanel->AutomaticRefresh)
+                    {
+                        PostMessage(MainWindow->BottomLeftPanel->HWindow, WM_USER_REFRESH_DIR, 0, t3);
+                    }
+                    if (!MainWindow->BottomRightPanel->AutomaticRefresh)
+                    {
+                        PostMessage(MainWindow->BottomRightPanel->HWindow, WM_USER_REFRESH_DIR, 0, t4);
                     }
                 }
             }
@@ -391,6 +408,11 @@ BOOL CFilesWindow::ClipboardPaste(BOOL onlyLinks, BOOL onlyTest, const char* pas
             MainWindow->LeftPanel->ClearCutToClipFlag(TRUE);
         if (MainWindow->RightPanel->CutToClipChanged)
             MainWindow->RightPanel->ClearCutToClipFlag(TRUE);
+
+        if (MainWindow->BottomLeftPanel->CutToClipChanged)
+            MainWindow->BottomLeftPanel->ClearCutToClipFlag(TRUE);
+        if (MainWindow->BottomRightPanel->CutToClipChanged)
+            MainWindow->BottomRightPanel->ClearCutToClipFlag(TRUE);
     }
 
     return files;
@@ -1143,7 +1165,7 @@ void CFilesWindow::OfferArchiveUpdateIfNeeded(HWND parent, int textID, BOOL* arc
 
     OfferArchiveUpdateIfNeededAux(parent, textID, archMaybeUpdated);
 
-    CFilesWindow* otherPanel = MainWindow->LeftPanel == this ? MainWindow->RightPanel : MainWindow->LeftPanel;
+    CFilesWindow* otherPanel = MainWindow->GetOtherPanel(this);
     BOOL otherPanelArchMaybeUpdated = FALSE;
     if (otherPanel->Is(ptZIPArchive) && StrICmp(GetZIPArchive(), otherPanel->GetZIPArchive()) == 0)
     { // stejny archiv je i v druhem panelu, musime provest i jeho update
@@ -1371,7 +1393,7 @@ BOOL CFilesWindow::OnTimer(WPARAM wParam, LPARAM lParam, LRESULT* lResult)
                     {
                         SetCaretIndex(index, TRUE);
                         if (activePanel != this)
-                            MainWindow->ChangePanel();
+                            MainWindow->ChangePanel(this);
                     }
                 }
                 else
@@ -2005,7 +2027,8 @@ BOOL CFilesWindow::BuildColumnsTemplate()
     column.CustomData = 0;
     CColumDataItem* item;
 
-    BOOL leftPanel = (this == MainWindow->LeftPanel);
+    BOOL leftPanel = IsLeftPanel();
+    BOOL topPanel = IsTopPanel();
 
     // vyberu s sablony pohledy odpovidajici konfiguracni pole
     CColumnConfig* colCfg = ViewTemplate->Columns;
@@ -2037,8 +2060,16 @@ BOOL CFilesWindow::BuildColumnsTemplate()
             column.SupportSorting = item->SupportSorting;
             column.LeftAlignment = item->LeftAlignment;
             column.ID = item->ID;
-            column.Width = leftPanel ? colCfg[i].LeftWidth : colCfg[i].RightWidth;
-            column.FixedWidth = leftPanel ? colCfg[i].LeftFixedWidth : colCfg[i].RightFixedWidth;
+            if (topPanel)
+            {
+                column.Width = leftPanel ? colCfg[i].LeftWidth : colCfg[i].RightWidth;
+                column.FixedWidth = leftPanel ? colCfg[i].LeftFixedWidth : colCfg[i].RightFixedWidth;
+            }
+            else
+            {
+                column.Width = leftPanel ? colCfg[i].BottomLeftWidth : colCfg[i].BottomRightWidth;
+                column.FixedWidth = leftPanel ? colCfg[i].BottomLeftFixedWidth : colCfg[i].BottomRightFixedWidth;
+            }
             column.MinWidth = 0; // dummy - bude prepsana pri dimenzovani HeaderLine
 
             ColumnsTemplate.Add(column);
@@ -2106,6 +2137,9 @@ void CFilesWindow::DeleteColumnsWithoutData(DWORD columnValidMask)
         case COLUMN_ID_DESCRIPTION:
             delColumn = TRUE;
             break; // description se zatim nepouziva
+        case COLUMN_ID_AGE:
+            delColumn = (columnValidMask & VALID_DATA_TIME) == 0;
+            break;
         }
         if (delColumn)
         {
@@ -2121,7 +2155,8 @@ void CFilesWindow::OnHeaderLineColWidthChanged()
     CALL_STACK_MESSAGE1("CFilesWindow::OnHeaderLineColWidthChanged()");
     // prenesu data z panelu do sablony
     BOOL pluginColMaybeChanged = FALSE;
-    BOOL leftPanel = (this == MainWindow->LeftPanel);
+    BOOL leftPanel = IsLeftPanel();
+    BOOL topPanel = IsTopPanel();
     int i;
     for (i = 0; i < Columns.Count; i++)
     {
@@ -2156,6 +2191,9 @@ void CFilesWindow::OnHeaderLineColWidthChanged()
         case COLUMN_ID_DESCRIPTION:
             colIndex = 8;
             break;
+        case COLUMN_ID_AGE:
+            colIndex = 9;
+            break;
         }
         if (column->ID == COLUMN_ID_CUSTOM) // jde o sloupec pridany pluginem
         {
@@ -2169,10 +2207,24 @@ void CFilesWindow::OnHeaderLineColWidthChanged()
         {
             if (colIndex != -1) // "always true"
             {
-                if (leftPanel)
-                    ViewTemplate->Columns[colIndex].LeftWidth = column->Width;
-                else
-                    ViewTemplate->Columns[colIndex].RightWidth = column->Width;
+
+                
+                //  todo view templates
+
+                //if (topPanel)
+                {
+                    if (leftPanel)
+                        ViewTemplate->Columns[colIndex].LeftWidth = column->Width;
+                    else
+                        ViewTemplate->Columns[colIndex].RightWidth = column->Width;
+                }
+                /*else
+                {
+                    if (leftPanel)
+                        ViewTemplate->Columns[colIndex].BottomLeftWidth = column->Width;
+                    else
+                        ViewTemplate->Columns[colIndex].BottomRightWidth = column->Width;
+                }*/
             }
             else
                 TRACE_E("CFilesWindow::OnHeaderLineColWidthChanged(): unexpected column-ID!");

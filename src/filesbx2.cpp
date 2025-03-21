@@ -237,7 +237,7 @@ void CHeaderLine::PaintItem(HDC hDC, int index, int x)
             sort = TRUE;
         else if (column->ID == COLUMN_ID_SIZE && panel->SortType == stSize)
             sort = TRUE;
-        else if ((column->ID == COLUMN_ID_DATE || column->ID == COLUMN_ID_TIME) && panel->SortType == stTime)
+        else if ((column->ID == COLUMN_ID_DATE || column->ID == COLUMN_ID_TIME || column->ID == COLUMN_ID_AGE) && panel->SortType == stTime)
             sort = TRUE;
         else if (column->ID == COLUMN_ID_EXTENSION && panel->SortType == stExtension)
             sort = TRUE;
@@ -714,7 +714,7 @@ CHeaderLine::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
                     st = stExtension;
                 else if (column->ID == COLUMN_ID_SIZE)
                     st = stSize;
-                else if (column->ID == COLUMN_ID_DATE || column->ID == COLUMN_ID_TIME)
+                else if (column->ID == COLUMN_ID_DATE || column->ID == COLUMN_ID_TIME || column->ID == COLUMN_ID_AGE)
                     st = stTime;
                 else if (column->ID == COLUMN_ID_ATTRIBUTES)
                     st = stAttr;

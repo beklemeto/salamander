@@ -309,6 +309,8 @@ enum CMainWindowsHitTestEnum
     mwhteCmdLine,
     mwhteBottomToolbar,
     mwhteSplitLine,
+    mwhteLeftHorizSplitLine,
+    mwhteRightHorizSplitLine,
     mwhteLeftDirLine,
     mwhteLeftHeaderLine,
     mwhteLeftStatusLine,
@@ -317,6 +319,14 @@ enum CMainWindowsHitTestEnum
     mwhteRightHeaderLine,
     mwhteRightStatusLine,
     mwhteRightWorkingArea,
+    mwhteBottomLeftDirLine,
+    mwhteBottomLeftHeaderLine,
+    mwhteBottomLeftStatusLine,
+    mwhteBottomLeftWorkingArea,
+    mwhteBottomRightDirLine,
+    mwhteBottomRightHeaderLine,
+    mwhteBottomRightStatusLine,
+    mwhteBottomRightWorkingArea,
 };
 
 struct CChangeNotifData
@@ -368,16 +378,23 @@ struct CDynString
 #define COMPARE_DIRECTORIES_IGNFILENAMES 0x00000080 // ignorovat soubory, jejichz jmena odpovidajici masce Configuration.CompareIgnoreFilesMasks
 #define COMPARE_DIRECTORIES_IGNDIRNAMES 0x00000100  // ignorovat adresare, jejichz jmena odpovidajici masce Configuration.CompareIgnoreDirsMasks
 
+
+
 class CMainWindow : public CMainWindowAncestor
 {
+    const int MIN_WIN_WIDTH = 2;  // minimalni sirka panelu
+    const int MIN_WIN_HEIGHT = 2; // minimalni sirka panelu
+
 public:
     BOOL EditMode;             // aktivni editwindow, zbytek jen simuluje
     BOOL EditPermanentVisible; // editwindow je stale viditelne
     BOOL HelpMode;             // if TRUE, then Shift+F1 help mode is active
-
+    
     CFilesWindow *LeftPanel,
-        *RightPanel;
-    CEditWindow* EditWindow;
+                 *RightPanel,
+                 *BottomLeftPanel,
+                 *BottomRightPanel;
+    CEditWindow* EditWindow;    // command line
     CMainToolBar* TopToolBar;
     CPluginsBar* PluginsBar;
     CMainToolBar* MiddleToolBar;
@@ -385,7 +402,9 @@ public:
     CHotPathsBar* HPToolBar;
     CDriveBar* DriveBar;
     CDriveBar* DriveBar2;
-    CBottomToolBar* BottomToolBar;
+    CBottomToolBar* BottomToolBar;  // bottom toolbar
+    CMainToolBar *LeftSplitBar, 
+             *RightSplitBar;
     //CAnimate       *AnimateBar;
 
     HWND HTopRebar;
@@ -425,8 +444,16 @@ public:
     BOOL DisableIdleProcessing;       // TRUE = nebudeme provadet IDLE processing (soft jiz konci, jen by zdrzoval a vse komplikoval)
                                       //    CTipOfTheDayDialog *TipOfTheDayDialog;
 
-    BOOL DragMode;
+    enum DragModeType
+    {
+        DRAG_MODE_OFF,
+        DRAG_MODE_LEFT,
+        DRAG_MODE_MIDDLE,
+        DRAG_MODE_RIGHT
+    };
+    DragModeType DragMode;
     int DragSplitX;
+    int DragSplitY;
 
     // tuto funkci jsem zatim vyradil - implmenetace by znamenala modifikaci zobrazeneho menu
     //    HWND           DrivesControlHWnd;   // pokud je zobrazeno Alt+F1/F2 okno, je zde jeho handle, jinak NULL
@@ -460,18 +487,33 @@ public:
 
     CITaskBarList3 TaskBarList3; // pro ovladani progress na taskbar od W7
 
+    CFilesWindow* otherPanels[3];
+
 protected:
+    
     int WindowWidth, // kvuli zmene splitu
         WindowHeight,
         TopRebarHeight,
         BottomToolBarHeight,
         EditHeight,
-        PanelsHeight,
-        SplitPositionPix,
-        DragAnchorX;
-    double SplitPosition,        // akualni split position (0..1)
-        BeforeZoomSplitPosition, // split position pret Zoomovanim panelu
-        DragSplitPosition;       // zobrazeno v tooltipu
+        PanelsTotalHeight;
+
+    int LeftWidth,
+        RightWidth;
+    int LeftHeight,
+        RightHeight,
+        BottomLeftHeight,
+        BottomRightHeight;
+
+    struct Splitter
+    {
+        int SplitPositionPix;
+        int DragAnchor;
+        double SplitPosition;
+        double BeforeZoomSplitPosition;
+        double DragSplitPosition;
+    } midSplitter, leftSplitter, rightSplitter;
+           
     CToolTipWindow ToolTipWindow;
 
     BOOL FirstActivateApp; // WM_ACTIVATEAPP vyuziva tuto promennou pri spusteni
@@ -490,6 +532,15 @@ public:
     void ClearHistory(); // promaze vsechny historie
 
     void GetSplitRect(RECT& r);
+    BOOL SplitBarDragBegin(POINT p, BOOL leftButtonDown, BOOL leftButtonClick);
+    void SplitBarDragMove(POINT p);
+    BOOL SplitBarDragEnd(BOOL leftButtonUp);
+
+    BOOL GetLeftHorizSplitRect(RECT& r);
+    BOOL GetRightHorizSplitRect(RECT& r);
+    BOOL HorizSplitBarDragBegin(POINT p, BOOL leftButtonDown, BOOL leftButtonClick);
+    void HorizSplitBarDragMove(POINT p);
+    BOOL HorizSplitBarDragEnd(BOOL leftButtonUp);
 
     BOOL IsGood();
 
@@ -500,7 +551,7 @@ public:
     void PostChangeOnPathNotification(const char* path, BOOL includingSubdirs);
 
     // tyto funkce nedopadnou, pokud neni splnena podminka CFilesWindow::CanBeFocused
-    void ChangePanel(BOOL force = FALSE);                                   // cti EditMode; aktivuje neaktivni panel; (pokud je force==TRUE, ignoruje ZOOM)
+    void ChangePanel(CFilesWindow* newActivePanel, BOOL force = FALSE);     // cti EditMode; aktivuje neaktivni panel; (pokud je force==TRUE, ignoruje ZOOM)
     void FocusPanel(CFilesWindow* focus, BOOL testIfMainWndActive = FALSE); // sejme EditMode, protoze do panelu umisti focus
     void FocusLeftPanel();                                                  // vola FocusPanel pro levy panel
 
@@ -563,9 +614,97 @@ public:
     HWND GetActivePanelHWND();
     int GetDirectoryLineHeight();
 
+    CFilesWindow* GetNextPanel(CFilesWindow* panel)
+    {
+        if (panel == LeftPanel)
+            return RightPanel;
+        if (panel == RightPanel)
+            return BottomLeftPanel;
+
+        if (panel == BottomLeftPanel)
+            return BottomRightPanel;
+        if (panel == BottomRightPanel)
+            return LeftPanel;
+
+        TRACE_E("Invalid panel - other panel return value: " << panel);
+        return NULL;
+    }
+
+    CFilesWindow* GetPrevPanel(CFilesWindow* panel)
+    {
+        if (panel == LeftPanel)
+            return BottomRightPanel;
+        if (panel == RightPanel)
+            return LeftPanel;
+
+        if (panel == BottomLeftPanel)
+            return RightPanel;
+        if (panel == BottomRightPanel)
+            return BottomLeftPanel;
+
+        TRACE_E("Invalid panel - other panel return value: " << panel);
+        return NULL;
+    }
+
     CFilesWindow* GetOtherPanel(CFilesWindow* panel)
     {
-        return panel == LeftPanel ? RightPanel : LeftPanel;
+        if (panel == LeftPanel)
+            return RightPanel;
+        if (panel == RightPanel)
+            return LeftPanel;
+
+        if (panel == BottomLeftPanel)
+            return BottomRightPanel;
+        if (panel == BottomRightPanel)
+            return BottomLeftPanel;
+
+        TRACE_E("Invalid panel - other panel return value: " << panel);
+        return NULL;
+    }
+
+    CFilesWindow** GetOtherPanels(CFilesWindow* panel)
+    {
+        int i = 0;
+
+        if (panel != LeftPanel)
+        {
+            otherPanels[i] = LeftPanel;
+            i++;
+        }
+        if (panel != RightPanel)
+        {
+            otherPanels[i] = RightPanel;
+            i++;
+        }
+
+        if (panel != BottomLeftPanel)
+        {
+            otherPanels[i] = BottomLeftPanel;
+            i++;
+        }
+        if (panel != BottomRightPanel)
+        {
+            otherPanels[i] = BottomRightPanel;
+            i++;
+        }
+
+        return otherPanels;
+    }
+    
+    unsigned int GetPanelId(CFilesWindow* panel)
+    {
+        if (panel == LeftPanel)
+            return PANEL_LEFT;
+        else if (panel == RightPanel)
+            return PANEL_RIGHT;
+
+        else if (panel == BottomLeftPanel)
+            return PANEL_BOTTOM_LEFT;
+        else if (panel == BottomRightPanel)
+            return PANEL_BOTTOM_RIGHT;
+
+        TRACE_E("Invalid panel - panel id return value: " << panel);
+        return NULL;
     }
 
     BOOL EditWindowKnowHWND(HWND hwnd);
@@ -587,6 +726,9 @@ public:
     BOOL ToggleDriveBar(BOOL twoDriveBars, BOOL storePos = TRUE);
 
     void ToggleToolBarGrips();
+
+    void HorizontalPanelsSwap(BOOL topPanels);
+    void VerticalPanelsSwap(BOOL leftPanels);
 
     BOOL InsertMenuBand();
     BOOL CreateAndInsertWorkerBand();
@@ -637,7 +779,14 @@ public:
 
     CFilesWindow* GetNonActivePanel()
     {
-        return (GetActivePanel() == LeftPanel) ? RightPanel : LeftPanel;
+        
+        return GetOtherPanel(GetActivePanel());
+        //return (GetActivePanel() == LeftPanel) ? RightPanel : LeftPanel;
+    }
+
+    CFilesWindow** GetNonActivePanels()
+    {
+        return GetOtherPanels(GetActivePanel());
     }
 
     virtual LRESULT WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -696,6 +845,7 @@ public:
 
     // vrati sirku split bary v bodech (pokud je zobrazena Middle Bar, bude o ni rozsirena)
     int GetSplitBarWidth();
+    int GetHorizSplitBarHeight();
 
     void StartAnimate();
     void StopAnimate();
@@ -709,7 +859,12 @@ public:
 
     // vraci TRUE, pokud je panel maximalizovan na ukor druheho panelu
     // a prikaz Zoom povede k nastaveni obou panelu v pomeru 50 ku 50 procentum
-    BOOL IsPanelZoomed(BOOL leftPanel);
+    BOOL IsPanelZoomed(BOOL topPanel, BOOL leftPanel);
+    CFilesWindow* GetZoomedPanel();
+    void ZoomPanel(CFilesWindow* panel);
+    void RestoreZoomedPanel(CFilesWindow* panel);
+
+
 
     // prepne Smart Column mode pro dany panel
     void ToggleSmartColumnMode(CFilesWindow* panel);

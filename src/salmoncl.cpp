@@ -296,7 +296,7 @@ BOOL SalmonInit()
 }
 
 // info ze nebezi salmon staci zobrazit jednou
-static BOOL SalmonNotRunningReported = FALSE;
+static BOOL SalmonNotRunningReported = TRUE; //  disamble diagnostic checking at startup
 
 void SalmonSetSLG(const char* slgName)
 {

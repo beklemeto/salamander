@@ -526,6 +526,7 @@
 #define IDS_COLUMN_NAME_TIME       10266
 #define IDS_COLUMN_NAME_ATTR       10267
 #define IDS_COLUMN_NAME_DESC       10268
+#define IDS_COLUMN_NAME_AGE        10269
 
 // column descriptions in panel
 #define IDS_COLUMN_DESC_NAME       10270
@@ -537,6 +538,7 @@
 #define IDS_COLUMN_DESC_TIME       10276
 #define IDS_COLUMN_DESC_ATTR       10277
 #define IDS_COLUMN_DESC_DESC       10278
+#define IDS_COLUMN_DESC_AGE        10279
 
 // font description in configuration dialog   "10 pt. MS Shell Dlg"
 #define IDS_FONTDESCRIPTION        10280
@@ -1163,7 +1165,12 @@
 #define IDS_INFODLGTYPE10             10953
 
 // Change Drive window: text of Documents item
-#define IDS_MYDOCUMENTS               10927
+#define IDS_MYDOCUMENTS                 10927
+#define IDS_DOWNLOADS                   10928
+#define IDS_DESKTOP                     10929
+#define IDS_MYVIDEOS                    10935
+#define IDS_MYPICTURES                  10936
+#define IDS_MYMUSIC                     10937
 
 // strings for Diconnect Network Drives dialog
 #define IDS_DISCONNECT_NAME           10930
@@ -1201,6 +1208,8 @@
 #define IDS_PATHMENU_BROWSE           10980
 #define IDS_PATHMENU_LEFT       10981
 #define IDS_PATHMENU_RIGHT        10982
+#define IDS_PATHMENU_BOTTOM_LEFT       10983
+#define IDS_PATHMENU_BOTTOM_RIGHT        10984
 
 // Panel > Size Column > Display mode
 #define IDS_SIZEMODE_BYTES            10985
@@ -2067,8 +2076,9 @@
 #define IDS_MENU_LEFT_GO_ROOT        13014
 #define IDS_MENU_LEFT_GO_OTHER       13015
 #define IDS_MENU_LEFT_ZOOM           13016
-#define IDS_MENU_LEFT_SWAPPANELS     13017
+#define IDS_MENU_LEFT_HSWAPPANELS    13017
 #define IDS_MENU_LEFT_SORTOPTIONS    13018
+#define IDS_MENU_LEFT_VSWAPPANELS    13019
 
 #define IDS_MENU_FILES               13020
 #define IDS_MENU_FILES_RENAME        13021
@@ -2198,9 +2208,16 @@
 #define IDS_MENU_OPT_VSB_PLG         13165
 #define IDS_MENU_OPT_CST_PLG         13166
 #define IDS_MENU_OPT_IMPORTCONFIG    13167
+//added for bottom panels
+#define IDS_MENU_OPT_CST_BOTTOMLEFT  13168
+#define IDS_MENU_OPT_CST_BOTTOMRIGHT 13169
 
 #define IDS_MENU_RIGHT               13170
 #define IDS_MENU_RIGHT_CHANGEDRIVE   13171
+#define IDS_MENU_BOTTOMLEFT               13172
+#define IDS_MENU_BOTTOMLEFT_CHANGEDRIVE   13173
+#define IDS_MENU_BOTTOMRIGHT               13174
+#define IDS_MENU_BOTTOMRIGHT_CHANGEDRIVE   13175
 
 #define IDS_MENU_HELP                13190
 #define IDS_MENU_HELP_CONTENTS       13191
@@ -2293,6 +2310,7 @@
 #define IDS_COLUMN_CFG_TIME             13386
 #define IDS_COLUMN_CFG_ATTR             13387
 #define IDS_COLUMN_CFG_DESC             13388
+#define IDS_COLUMN_CFG_AGE              13389
 
 // column names in menu
 #define IDS_COLUMN_MENU_NAME            13400
@@ -2708,6 +2726,14 @@
 
 // shutdown: wait window: Closing Find windows, please wait...
 #define IDS_CLOSINGFINDWINDOWS          14195
+
+
+
+#define IDS_COLUMN_AGE_MIN              14300
+#define IDS_COLUMN_AGE_HOUR             14301
+#define IDS_COLUMN_AGE_DAY              14302
+#define IDS_COLUMN_AGE_MONTH            14303
+#define IDS_COLUMN_AGE_YEAR             14304
 
 //#define CM_TEXTS_MAX                  18000    // maximal texts id
 

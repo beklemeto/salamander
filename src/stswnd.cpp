@@ -536,14 +536,26 @@ void CStatusWindow::SetSize(const CQuadWord& size)
         InvalidateRect(HWindow, NULL, FALSE);
 }
 
-void CStatusWindow::SetLeftPanel(BOOL left)
+void CStatusWindow::SetTopLeftPanel(BOOL top, BOOL left)
 {
     CALL_STACK_MESSAGE_NONE
     Left = left;
+    Top = top;
+    
+    
+    
+
     if (ToolBar != NULL)
     {
-        ToolBar->SetType(Left ? mtbtLeft : mtbtRight);
-        ToolBar->Load(Left ? Configuration.LeftToolBar : Configuration.RightToolBar);
+        if (Top)
+            ToolBar->SetType(Left ? mtbtLeft : mtbtRight);
+        else
+            ToolBar->SetType(Left ? mtbtBottomLeft : mtbtBottomRight);
+
+        if (Top)
+            ToolBar->Load(Left ? Configuration.LeftToolBar : Configuration.RightToolBar);
+        else
+            ToolBar->Load(Left ? Configuration.BottomLeftToolBar : Configuration.BottomRightToolBar);
     }
 }
 
@@ -564,7 +576,11 @@ BOOL CStatusWindow::ToggleToolBar()
         ToolBar->SetImageList(HGrayToolBarImageList);
         ToolBar->SetHotImageList(HHotToolBarImageList);
         ToolBar->SetStyle(TLB_STYLE_IMAGE | TLB_STYLE_ADJUSTABLE);
-        ToolBar->Load(Left ? Configuration.LeftToolBar : Configuration.RightToolBar);
+        if (Top)
+            ToolBar->Load(Left ? Configuration.LeftToolBar : Configuration.RightToolBar);
+        else
+            ToolBar->Load(Left ? Configuration.BottomLeftToolBar : Configuration.BottomRightToolBar);
+
         SendMessage(ToolBar->HWindow, TB_SETPARENT, (WPARAM)MainWindow->HWindow, 0);
         ShowWindow(ToolBar->HWindow, SW_SHOW);
         return TRUE;
@@ -576,7 +592,14 @@ BOOL CStatusWindow::SetDriveIcon(HICON hIcon)
 {
     CALL_STACK_MESSAGE_NONE
     if (ToolBar != NULL && ToolBar->HWindow != NULL)
-        ToolBar->ReplaceImage(Left ? CM_LCHANGEDRIVE : CM_RCHANGEDRIVE, FALSE, hIcon, TRUE, TRUE);
+    {
+        DWORD pos = 0;
+        if (Top)
+            pos = Left ? CM_LCHANGEDRIVE : CM_RCHANGEDRIVE;
+        else
+            pos = Left ? CM_BLCHANGEDRIVE : CM_BRCHANGEDRIVE;
+        ToolBar->ReplaceImage(pos, FALSE, hIcon, TRUE, TRUE);
+    }
     return TRUE;
 }
 
@@ -588,7 +611,13 @@ void CStatusWindow::SetDrivePressed(BOOL pressed)
         TLBI_ITEM_INFO2 tii;
         tii.Mask = TLBI_MASK_STATE;
         tii.State = pressed ? TLBI_STATE_PRESSED : 0;
-        ToolBar->SetItemInfo2(Left ? CM_LCHANGEDRIVE : CM_RCHANGEDRIVE, FALSE, &tii);
+
+        DWORD pos = 0;
+        if (Top)
+            pos = Left ? CM_LCHANGEDRIVE : CM_RCHANGEDRIVE;
+        else
+            pos = Left ? CM_BLCHANGEDRIVE : CM_BRCHANGEDRIVE;
+        ToolBar->SetItemInfo2(pos, FALSE, &tii);
         UpdateWindow(ToolBar->HWindow);
     }
 }
@@ -1114,13 +1143,10 @@ void CStatusWindow::Paint(HDC hdc, BOOL highlightText, BOOL highlightHotTrackOnl
         HDC hMemDC = HANDLES(CreateCompatibleDC(NULL));
 
         // zoom symbol
-        if (ZoomRect.left < ZoomRect.right)
+        if (ZoomRect.left < ZoomRect.right) //  not sure whether ZoomRect.left<right needed; test if works...
         {
-            BOOL zoomed;
-            if (MainWindow->LeftPanel == FilesWindow)
-                zoomed = MainWindow->IsPanelZoomed(TRUE);
-            else
-                zoomed = MainWindow->IsPanelZoomed(FALSE);
+            BOOL zoomed = MainWindow->IsPanelZoomed(FilesWindow->IsTopPanel(), FilesWindow->IsLeftPanel());
+
             PaintSymbol(dc, hMemDC, HZoomBitmap, zoomed ? ZOOM_WIDTH : 0, ZOOM_WIDTH, ZOOM_HEIGHT, &ZoomRect, HotZoom, activeCaption);
         }
 
@@ -1597,7 +1623,13 @@ CStatusWindow::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         if (Border & blTop)
         {
-            ToolBar = new CMainToolBar(MainWindow->HWindow, Left ? mtbtLeft : mtbtRight);
+            CMainToolBarType type;
+            if (Top)
+                type = Left ? mtbtLeft : mtbtRight;
+            else
+                type = Left ? mtbtBottomLeft : mtbtBottomRight;
+
+            ToolBar = new CMainToolBar(MainWindow->HWindow, type);
             if (ToolBar == NULL)
             {
                 TRACE_E(LOW_MEMORY);
@@ -2016,12 +2048,12 @@ CStatusWindow::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
         SetCurrentToolTip(NULL, 0);
 
         if (HotHistory && MainWindow->GetActivePanel() != FilesWindow)
-            MainWindow->ChangePanel();
+            MainWindow->ChangePanel(FilesWindow);
 
         if (!MouseCaptured && (uMsg == WM_LBUTTONDOWN || uMsg == WM_LBUTTONDBLCLK))
         {
             if (MainWindow->GetActivePanel() != FilesWindow)
-                MainWindow->ChangePanel();
+                MainWindow->ChangePanel(FilesWindow);
             if (uMsg == WM_LBUTTONDBLCLK && (Border & blTop))
                 SendMessage(MainWindow->HWindow, WM_COMMAND, MAKEWPARAM(CM_ACTIVE_CHANGEDIR, 0), 0);
         }
@@ -2068,7 +2100,7 @@ CStatusWindow::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
                     if (Border & blTop)
                     {
                         if (MainWindow->GetActivePanel() != FilesWindow)
-                            MainWindow->ChangePanel();
+                            MainWindow->ChangePanel(FilesWindow);
 
                         CHotTrackItem* lastItem = NULL;
                         if (HotTrackItems.Count > 0)
@@ -2106,8 +2138,17 @@ CStatusWindow::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
                 if (HotZoom)
                 {
-                    SendMessage(MainWindow->HWindow, WM_COMMAND,
-                                MainWindow->LeftPanel == FilesWindow ? CM_LEFTZOOMPANEL : CM_RIGHTZOOMPANEL, 0);
+                    int param = 0;
+                    if (FilesWindow->IsTopPanel())
+                    {
+                        param = FilesWindow->IsLeftPanel() ? CM_LEFTZOOMPANEL : CM_RIGHTZOOMPANEL;
+                    }
+                    else
+                    {
+                        param = FilesWindow->IsLeftPanel() ? CM_BOTTOMLEFTZOOMPANEL : CM_BOTTOMRIGHTZOOMPANEL;
+                    }
+
+                    SendMessage(MainWindow->HWindow, WM_COMMAND, param, 0);
                     UpdateWindow(MainWindow->HWindow); // aby nasledujici WM_MOUSEMOVE prisel uz do prekresleneho okna
                 }
 

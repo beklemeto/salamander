@@ -62,6 +62,11 @@ enum CDriveTypeEnum
     drvtCDROM,                // The drive is a CD-ROM drive
     drvtRAMDisk,              // The drive is a RAM disk
     drvtMyDocuments,          // The drive is a Documents
+    drvtDownloads,              // The drive is a Documents
+    drvtDesktop,                // The drive is a Documents
+    drvtMyVideos,               // The drive is a Documents
+    drvtMyPictures,             // The drive is a Documents
+    drvtMyMusic,           // The drive is a Documents
     drvtGoogleDrive,          // the item is a Cloud Storage: Google Drive
     drvtDropbox,              // the item is a Cloud Storage: Dropbox
     drvtOneDrive,             // the item is a Cloud Storage: OneDrive - Personal

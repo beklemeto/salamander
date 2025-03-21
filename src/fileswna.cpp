@@ -21,8 +21,8 @@ void CFilesWindow::PluginFSFilesAction(CPluginFSActionType type)
         return;
     if (!Is(ptPluginFS) || !GetPluginFS()->NotEmpty())
         return;
-    int panel = MainWindow->LeftPanel == this ? PANEL_LEFT : PANEL_RIGHT;
-    CFilesWindow* target = (MainWindow->LeftPanel == this ? MainWindow->RightPanel : MainWindow->LeftPanel);
+    int panel = GetWindowPanelType();
+    CFilesWindow* target = MainWindow->GetOtherPanel(this);
     BOOL unselect = FALSE;
 
     BeginSuspendMode(); // cmuchal si da pohov

@@ -99,7 +99,13 @@ BOOL CDriveBar::CreateDriveButtons(CDriveBar* copyDrivesListFrom)
         SetCheckedDrive(MainWindow->GetActivePanel(), TRUE);
     else
     {
-        CFilesWindow* panel = this == MainWindow->DriveBar2 ? MainWindow->RightPanel : MainWindow->LeftPanel;
+        BOOL isTop = MainWindow->GetActivePanel()->IsTopPanel();
+        CFilesWindow* panel = NULL;
+        if (isTop)
+            panel = this == MainWindow->DriveBar2 ? MainWindow->RightPanel : MainWindow->LeftPanel;
+        else
+            panel = this == MainWindow->DriveBar2 ? MainWindow->BottomRightPanel : MainWindow->BottomLeftPanel;
+                
         SetCheckedDrive(panel, TRUE);
     }
     SendMessage(HWindow, WM_SETREDRAW, TRUE, 0);
@@ -134,9 +140,17 @@ void CDriveBar::Execute(DWORD id)
         {
             CFilesWindow* panel;
             if (MainWindow->DriveBar2->HWindow != NULL)
-                panel = bar2 ? MainWindow->RightPanel : MainWindow->LeftPanel;
+            {
+                BOOL isTop = MainWindow->GetActivePanel()->IsTopPanel();
+                if (isTop)
+                    panel = bar2 ? MainWindow->RightPanel : MainWindow->LeftPanel;
+                else
+                    panel = bar2 ? MainWindow->BottomRightPanel : MainWindow->BottomLeftPanel;
+            }
             else
+            {
                 panel = MainWindow->GetActivePanel();
+            }
 
             if (DriveType != drvtPluginCmd)
                 panel->TopIndexMem.Clear(); // dlouhy skok
@@ -145,6 +159,11 @@ void CDriveBar::Execute(DWORD id)
             switch (DriveType)
             {
             case drvtMyDocuments:
+            case drvtDownloads:
+            case drvtDesktop:
+            case drvtMyVideos:
+            case drvtMyPictures:
+            case drvtMyMusic:
             case drvtGoogleDrive:
             case drvtDropbox:
             case drvtOneDrive:    // bud primo tlacitko nebo vybrane z drop down menu
@@ -196,7 +215,7 @@ void CDriveBar::Execute(DWORD id)
                 const char* dllName = (const char*)DriveTypeParam;
                 CPluginData* data = Plugins.GetPluginData(dllName);
                 if (data != NULL) // plug-in existuje, jdeme spustit prikaz
-                    data->ExecuteChangeDriveMenuItem(panel == MainWindow->LeftPanel ? PANEL_LEFT : PANEL_RIGHT);
+                    data->ExecuteChangeDriveMenuItem(panel->GetWindowPanelType());
                 return;
             }
             }
@@ -285,15 +304,23 @@ BOOL CDriveBar::OnContextMenu()
             CFilesWindow* panel;
             BOOL bar2 = this == MainWindow->DriveBar2;
             if (MainWindow->DriveBar2->HWindow != NULL)
-                panel = bar2 ? MainWindow->RightPanel : MainWindow->LeftPanel;
+            {
+                BOOL isTop = MainWindow->GetActivePanel()->IsTopPanel();
+                if (isTop)
+                    panel = bar2 ? MainWindow->RightPanel : MainWindow->LeftPanel;
+                else
+                    panel = bar2 ? MainWindow->BottomRightPanel : MainWindow->BottomLeftPanel;
+            }
             else
+            {
                 panel = MainWindow->GetActivePanel();
+            }
 
             PostCmd = 0;
             PostCmdParam = NULL;
             FromContextMenu = FALSE;
             const char* dllName = NULL;
-            List->OnContextMenu(TRUE, indexInList, panel == MainWindow->LeftPanel ? PANEL_LEFT : PANEL_RIGHT, &dllName);
+            List->OnContextMenu(TRUE, indexInList, panel->GetWindowPanelType(), &dllName);
             if (PostCmd != 0) // nastavuje se jen na drvtPluginFS a drvtPluginCmd, pricemz drvtPluginFS nemuze byt na Drive bare
             {
                 UpdateWindow(MainWindow->HWindow);
@@ -301,7 +328,7 @@ BOOL CDriveBar::OnContextMenu()
                 CPluginData* data = Plugins.GetPluginData(dllName);
                 if (data != NULL) // plug-in existuje, jdeme spustit prikaz
                 {                 // post-cmd z kontextoveho menu polozky FS
-                    data->GetPluginInterfaceForFS()->ExecuteChangeDrivePostCommand(panel == MainWindow->LeftPanel ? PANEL_LEFT : PANEL_RIGHT,
+                    data->GetPluginInterfaceForFS()->ExecuteChangeDrivePostCommand(panel->GetWindowPanelType(),
                                                                                    PostCmd, PostCmdParam);
                 }
             }

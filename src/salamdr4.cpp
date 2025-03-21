@@ -8,6 +8,7 @@
 #include "fileswnd.h"
 #include "mainwnd.h"
 #include "salinflt.h"
+#include <ctime>
 
 //****************************************************************************
 //
@@ -683,26 +684,29 @@ const char* SALAMANDER_VIEWTEMPLATE_FLAGS = "Flags";
 const char* SALAMANDER_VIEWTEMPLATE_COLUMNS = "Columns";
 const char* SALAMANDER_VIEWTEMPLATE_LEFTSMARTMODE = "Left Smart Mode";
 const char* SALAMANDER_VIEWTEMPLATE_RIGHTSMARTMODE = "Right Smart Mode";
+const char* SALAMANDER_VIEWTEMPLATE_BOTTOMLEFTSMARTMODE = "Bottom Left Smart Mode";
+const char* SALAMANDER_VIEWTEMPLATE_BOTTOMRIGHTSMARTMODE = "Bottom Right Smart Mode";
 
 CViewTemplates::CViewTemplates()
 {
     // implicitni hodnoty
-    Set(0, VIEW_MODE_TREE, LoadStr(IDS_TREE_VIEW), 0, TRUE, TRUE);
-    Set(1, VIEW_MODE_BRIEF, LoadStr(IDS_BRIEF_VIEW), 0, TRUE, TRUE);
-    Set(2, VIEW_MODE_DETAILED, LoadStr(IDS_DETAILED_VIEW), VIEW_SHOW_SIZE | VIEW_SHOW_DATE | VIEW_SHOW_TIME | VIEW_SHOW_ATTRIBUTES, TRUE, TRUE);
-    Set(3, VIEW_MODE_ICONS, LoadStr(IDS_ICONS_VIEW), 0, TRUE, TRUE);
-    Set(4, VIEW_MODE_THUMBNAILS, LoadStr(IDS_THUMBNAILS_VIEW), 0, TRUE, TRUE);
-    Set(5, VIEW_MODE_TILES, LoadStr(IDS_TILES_VIEW), 0, TRUE, TRUE);
-    Set(6, VIEW_MODE_DETAILED, LoadStr(IDS_TYPES_VIEW), VIEW_SHOW_SIZE | VIEW_SHOW_TYPE | VIEW_SHOW_DATE | VIEW_SHOW_TIME | VIEW_SHOW_ATTRIBUTES, TRUE, TRUE);
-    //  Set(4, VIEW_MODE_DETAILED, LoadStr(IDS_DESCRIPTIONS_VIEW), VIEW_SHOW_SIZE | VIEW_SHOW_DESCRIPTION, TRUE, TRUE);
+    Set(0, VIEW_MODE_TREE, LoadStr(IDS_TREE_VIEW), 0);
+    Set(1, VIEW_MODE_BRIEF, LoadStr(IDS_BRIEF_VIEW), 0);
+    Set(2, VIEW_MODE_DETAILED, LoadStr(IDS_DETAILED_VIEW), VIEW_SHOW_SIZE | VIEW_SHOW_AGE | VIEW_SHOW_DATE | VIEW_SHOW_TIME | VIEW_SHOW_ATTRIBUTES);
+    Set(3, VIEW_MODE_ICONS, LoadStr(IDS_ICONS_VIEW), 0);
+    Set(4, VIEW_MODE_THUMBNAILS, LoadStr(IDS_THUMBNAILS_VIEW), 0);
+    Set(5, VIEW_MODE_TILES, LoadStr(IDS_TILES_VIEW), 0);
+    Set(6, VIEW_MODE_DETAILED, LoadStr(IDS_TYPES_VIEW), VIEW_SHOW_SIZE | VIEW_SHOW_TYPE | VIEW_SHOW_DATE | VIEW_SHOW_TIME | VIEW_SHOW_ATTRIBUTES);
+    //  Set(4, VIEW_MODE_DETAILED, LoadStr(IDS_DESCRIPTIONS_VIEW), VIEW_SHOW_SIZE | VIEW_SHOW_DESCRIPTION);
     int i;
     for (i = 7; i < VIEW_TEMPLATES_COUNT; i++)
-        Set(i, VIEW_MODE_DETAILED, "", 0, TRUE, TRUE);
+        Set(i, VIEW_MODE_DETAILED, "", 0);
     for (i = 0; i < VIEW_TEMPLATES_COUNT; i++)
         ZeroMemory(Items[i].Columns, sizeof(Items[i].Columns));
 }
 
-void CViewTemplates::Set(DWORD index, const char* name, DWORD flags, BOOL leftSmartMode, BOOL rightSmartMode)
+void CViewTemplates::Set(DWORD index, const char* name, DWORD flags, 
+    BOOL leftSmartMode, BOOL rightSmartMode, BOOL bottomLeftSmartMode, BOOL bottomRightSmartMode)
 {
     if (lstrlen(name) >= VIEW_NAME_MAX)
         TRACE_E("String is too long");
@@ -710,12 +714,15 @@ void CViewTemplates::Set(DWORD index, const char* name, DWORD flags, BOOL leftSm
     Items[index].Flags = flags;
     Items[index].LeftSmartMode = leftSmartMode;
     Items[index].RightSmartMode = rightSmartMode;
+    Items[index].BottomLeftSmartMode  = bottomLeftSmartMode;
+    Items[index].BottomRightSmartMode = bottomRightSmartMode;
 }
 
-void CViewTemplates::Set(DWORD index, DWORD viewMode, const char* name, DWORD flags, BOOL leftSmartMode, BOOL rightSmartMode)
+void CViewTemplates::Set(DWORD index, DWORD viewMode, const char* name, DWORD flags, 
+    BOOL leftSmartMode, BOOL rightSmartMode, BOOL bottomLeftSmartMode, BOOL bottomRightSmartMode)
 {
     Items[index].Mode = viewMode;
-    Set(index, name, flags, leftSmartMode, rightSmartMode);
+    Set(index, name, flags, leftSmartMode, rightSmartMode, bottomLeftSmartMode, bottomRightSmartMode);
 }
 
 BOOL CViewTemplates::SwapItems(int index1, int index2)
@@ -835,6 +842,8 @@ BOOL CViewTemplates::Save(HKEY hKey)
             SetValue(actKey, SALAMANDER_VIEWTEMPLATE_COLUMNS, REG_SZ, buff, SaveColumns(Items[i].Columns, buff));
             SetValue(actKey, SALAMANDER_VIEWTEMPLATE_LEFTSMARTMODE, REG_DWORD, &Items[i].LeftSmartMode, sizeof(DWORD));
             SetValue(actKey, SALAMANDER_VIEWTEMPLATE_RIGHTSMARTMODE, REG_DWORD, &Items[i].RightSmartMode, sizeof(DWORD));
+            SetValue(actKey, SALAMANDER_VIEWTEMPLATE_BOTTOMLEFTSMARTMODE, REG_DWORD,  &Items[i].BottomLeftSmartMode, sizeof(DWORD));
+            SetValue(actKey, SALAMANDER_VIEWTEMPLATE_BOTTOMRIGHTSMARTMODE, REG_DWORD, &Items[i].BottomRightSmartMode, sizeof(DWORD));
             CloseKey(actKey);
         }
     }
@@ -861,8 +870,12 @@ BOOL CViewTemplates::Load(HKEY hKey)
             buff[0] = 0;
             DWORD leftSM = TRUE;
             DWORD rightSM = TRUE;
+            DWORD bottomLeftSM = TRUE;
+            DWORD bottomRightSM = TRUE;
             GetValue(actKey, SALAMANDER_VIEWTEMPLATE_LEFTSMARTMODE, REG_DWORD, &leftSM, sizeof(DWORD));
             GetValue(actKey, SALAMANDER_VIEWTEMPLATE_RIGHTSMARTMODE, REG_DWORD, &rightSM, sizeof(DWORD));
+            GetValue(actKey, SALAMANDER_VIEWTEMPLATE_BOTTOMLEFTSMARTMODE, REG_DWORD, &bottomLeftSM, sizeof(DWORD));
+            GetValue(actKey, SALAMANDER_VIEWTEMPLATE_BOTTOMRIGHTSMARTMODE, REG_DWORD, &bottomRightSM, sizeof(DWORD));
             if (GetValue(actKey, SALAMANDER_VIEWTEMPLATE_NAME, REG_SZ, name, VIEW_NAME_MAX) &&
                 GetValue(actKey, SALAMANDER_VIEWTEMPLATE_FLAGS, REG_DWORD, &flags, sizeof(DWORD)) &&
                 GetValue(actKey, SALAMANDER_VIEWTEMPLATE_COLUMNS, REG_SZ, buff, 512))
@@ -899,7 +912,7 @@ BOOL CViewTemplates::Load(HKEY hKey)
                 if (resID != -1)
                     strcpy(name, LoadStr(resID));
 
-                Set(i, name, flags, leftSM, rightSM);
+                Set(i, name, flags, leftSM, rightSM, bottomLeftSM, bottomRightSM);
             }
             CloseKey(actKey);
         }
@@ -1284,8 +1297,100 @@ void WINAPI InternalGetType()
 }
 
 // tuhle optimalizaci si muzeme dovolit, protoze nejsme volani z vice threadu soucasne
-static SYSTEMTIME InternalColumnST;
-static FILETIME InternalColumnFT;
+static SYSTEMTIME InternalColumnLT; // local time - now
+static SYSTEMTIME InternalColumnST; // system time - file
+static FILETIME InternalColumnFT;   // file time
+
+
+void CalcAge()
+{
+    std::tm tm;
+    tm.tm_sec = InternalColumnST.wSecond;
+    tm.tm_min = InternalColumnST.wMinute;
+    tm.tm_hour = InternalColumnST.wHour;
+    tm.tm_mday = InternalColumnST.wDay;
+    tm.tm_mon = InternalColumnST.wMonth - 1;
+    tm.tm_year = InternalColumnST.wYear - 1900;
+    tm.tm_isdst = -1;
+
+    std::time_t t = std::mktime(&tm);
+    time_t now = time(0); // now
+
+    long long minutes = (now - t) / 60;
+    long long hours = minutes / 60;
+    long long days = hours / 24;
+    long long months = days / 30;
+    long long years = days / 356;
+
+    if (minutes < 0)
+    {
+        TransferLen = 0;
+        return;
+    }
+
+    if (minutes < 59)
+        TransferLen = sprintf(TransferBuffer, "%lld%s", minutes, LoadStr(IDS_COLUMN_AGE_MIN));
+
+    else if (hours < 1)
+        TransferLen = sprintf(TransferBuffer, "1%s", LoadStr(IDS_COLUMN_AGE_HOUR));
+    else if (hours < 24)
+        TransferLen = sprintf(TransferBuffer, "%lld%s", hours, LoadStr(IDS_COLUMN_AGE_HOUR));
+
+    else if (days <= 1)
+        TransferLen = sprintf(TransferBuffer, "1%s", LoadStr(IDS_COLUMN_AGE_DAY));
+    else if (days <= 30)
+        TransferLen = sprintf(TransferBuffer, "%lld%s", days, LoadStr(IDS_COLUMN_AGE_DAY));
+
+    else if (months <= 1)
+        TransferLen = sprintf(TransferBuffer, "1%s", LoadStr(IDS_COLUMN_AGE_MONTH));
+    else if (months < 12)
+        TransferLen = sprintf(TransferBuffer, "%lld%s", months, LoadStr(IDS_COLUMN_AGE_MONTH));
+
+    else if (years <= 1)
+        TransferLen = sprintf(TransferBuffer, "1%s", LoadStr(IDS_COLUMN_AGE_YEAR));
+    else
+        TransferLen = sprintf(TransferBuffer, "%lld%s", years, LoadStr(IDS_COLUMN_AGE_YEAR));
+}
+
+void WINAPI InternalGetAge()
+{
+    if ((TransferRowData & 0x00000001) == 0)
+    {
+        if (!FileTimeToLocalFileTime(&TransferFileData->LastWrite, &InternalColumnFT) ||
+            !FileTimeToSystemTime(&InternalColumnFT, &InternalColumnST))
+        {
+            TransferLen = sprintf(TransferBuffer, LoadStr(IDS_INVALID_DATEORTIME));
+            return;
+        }
+        TransferRowData |= 0x00000001;
+    }
+    
+    CalcAge();
+}
+
+void WINAPI InternalGetAgeOnlyForDisk()
+{
+    if ((TransferRowData & 0x00000001) == 0)
+    {
+        if (!FileTimeToLocalFileTime(&TransferFileData->LastWrite, &InternalColumnFT) ||
+            !FileTimeToSystemTime(&InternalColumnFT, &InternalColumnST))
+        {
+            TransferLen = sprintf(TransferBuffer, LoadStr(IDS_INVALID_DATEORTIME));
+            return;
+        }
+        TransferRowData |= 0x00000001;
+    }
+    if (TransferIsDir == 2 /* UP-DIR */ &&
+        InternalColumnST.wYear == 1602 && InternalColumnST.wMonth == 1 && InternalColumnST.wDay == 1 &&
+        InternalColumnST.wHour == 0 && InternalColumnST.wMinute == 0 && InternalColumnST.wSecond == 0 &&
+        InternalColumnST.wMilliseconds == 0)
+    {
+        TransferLen = 0;
+        return;
+    }
+
+    CalcAge();
+}
 
 void WINAPI InternalGetDate()
 {
@@ -1540,9 +1645,19 @@ BOOL CSalamanderView::InsertStandardColumn(int index, DWORD id)
         column.LeftAlignment = item->LeftAlignment;
         column.ID = item->ID;
         CColumnConfig* colCfg = Panel->ViewTemplate->Columns;
-        BOOL leftPanel = Panel == MainWindow->LeftPanel;
-        column.Width = leftPanel ? colCfg[i].LeftWidth : colCfg[i].RightWidth;
-        column.FixedWidth = leftPanel ? colCfg[i].LeftFixedWidth : colCfg[i].RightFixedWidth;
+
+        BOOL leftPanel = Panel->IsLeftPanel();
+        BOOL topPanel = Panel->IsTopPanel();
+        if (topPanel)
+        {
+            column.Width = leftPanel ? colCfg[i].LeftWidth : colCfg[i].RightWidth;
+            column.FixedWidth = leftPanel ? colCfg[i].LeftFixedWidth : colCfg[i].RightFixedWidth;
+        }
+        else
+        {
+            column.Width = leftPanel ? colCfg[i].BottomLeftWidth : colCfg[i].BottomRightWidth;
+            column.FixedWidth = leftPanel ? colCfg[i].BottomLeftFixedWidth : colCfg[i].BottomRightFixedWidth;
+        }
         column.MinWidth = 0; // dummy - bude prepsana pri dimenzovani HeaderLine
 
         Panel->Columns.Insert(index, column);

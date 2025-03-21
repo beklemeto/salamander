@@ -91,6 +91,7 @@ protected:
     int Allocated;
     int* AlpDX; // pole delek (od nulteho do Xteho znaku v retezci)
     BOOL Left;
+    BOOL Top;
 
     int ToolBarWidth; // aktualni sirka toolbary
 
@@ -172,10 +173,12 @@ public:
 
     BOOL FindHotTrackItem(int xPos, int& index);
 
-    void SetLeftPanel(BOOL left);
+    void SetTopLeftPanel(BOOL top, BOOL left);
     BOOL ToggleToolBar();
 
     BOOL IsLeft() { return Left; }
+
+    BOOL IsTop() { return Top; }
 
     BOOL SetDriveIcon(HICON hIcon);     // ikona se okopiruje do imagelistu - destrukci musi zajistit volajici kod
     void SetDrivePressed(BOOL pressed); // zamackne drive ikonku

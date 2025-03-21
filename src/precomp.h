@@ -85,6 +85,7 @@
 #include "regexp.h"
 #include "filter.h"
 #include "regwork.h"
+#include "numutils.h"
 
 #include "texts.rh2"
 #include "lang\lang.rh"

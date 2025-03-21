@@ -556,10 +556,10 @@ void CCallStack::PrintBugReport(EXCEPTION_POINTERS* Exception, DWORD ThreadID, D
                 message = "microsoft C++ exception";
                 break;
             case OPENSAL_EXCEPTION_RTC:
-                message = "open salamander rtc exception";
+                message = "quad salamander rtc exception";
                 break;
             case OPENSAL_EXCEPTION_BREAK:
-                message = "open salamander break exception";
+                message = "quad salamander break exception";
                 break;
             }
             sprintf(num, "code 0x%X", Exception->ExceptionRecord->ExceptionCode);

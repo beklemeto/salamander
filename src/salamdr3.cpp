@@ -852,6 +852,14 @@ pokud bude jeste nekdy potreba ozivit tenhle kod, vyuzit toho, ze lze nahradit (
                 {
                     PostMessage(MainWindow->RightPanel->HWindow, WM_USER_SM_END_NOTIFY, 0, 0);
                 }
+                if (MainWindow->BottomLeftPanel != NULL)
+                {
+                    PostMessage(MainWindow->BottomLeftPanel->HWindow, WM_USER_SM_END_NOTIFY, 0, 0);
+                }
+                if (MainWindow->BottomRightPanel != NULL)
+                {
+                    PostMessage(MainWindow->BottomRightPanel->HWindow, WM_USER_SM_END_NOTIFY, 0, 0);
+                }
             }
 
             if (MainWindow != NULL && MainWindow->NeedToResentDispachChangeNotif &&
@@ -3591,11 +3599,13 @@ BOOL CFileHistory::HasItem()
 // Directory editline/combobox support
 //
 
-#define DIRECTORY_COMMAND_BROWSE 1    // browse directory
-#define DIRECTORY_COMMAND_LEFT 3      // cesta z leveho panelu
-#define DIRECTORY_COMMAND_RIGHT 4     // cesta z praveho panelu
-#define DIRECTORY_COMMAND_HOTPATHF 5  // prvni hot path
-#define DIRECTORY_COMMAND_HOTPATHL 35 // posledni hot path
+#define DIRECTORY_COMMAND_BROWSE 1              // browse directory
+#define DIRECTORY_COMMAND_LEFT 3              // cesta z leveho panelu
+#define DIRECTORY_COMMAND_RIGHT 4             // cesta z praveho panelu
+#define DIRECTORY_COMMAND_BOTTOM_LEFT 13      // cesta z leveho panelu
+#define DIRECTORY_COMMAND_BOTTOM_RIGHT 14     // cesta z praveho panelu
+#define DIRECTORY_COMMAND_HOTPATHF 5        // prvni hot path
+#define DIRECTORY_COMMAND_HOTPATHL 35       // posledni hot path
 
 BOOL SetEditOrComboText(HWND hWnd, const char* text)
 {
@@ -3670,6 +3680,14 @@ MENU_TEMPLATE_ITEM CopyMoveBrowseMenu[] =
 
     mii.ID = DIRECTORY_COMMAND_RIGHT;
     mii.String = LoadStr(IDS_PATHMENU_RIGHT);
+    popup.InsertItem(0xFFFFFFFF, TRUE, &mii);
+
+    mii.ID = DIRECTORY_COMMAND_BOTTOM_LEFT;
+    mii.String = LoadStr(IDS_PATHMENU_BOTTOM_LEFT);
+    popup.InsertItem(0xFFFFFFFF, TRUE, &mii);
+
+    mii.ID = DIRECTORY_COMMAND_BOTTOM_RIGHT;
+    mii.String = LoadStr(IDS_PATHMENU_BOTTOM_RIGHT);
     popup.InsertItem(0xFFFFFFFF, TRUE, &mii);
 
     // pripojime hotpaths, existuji-li
@@ -3806,8 +3824,26 @@ void InvokeDirectoryMenuCommand(DWORD cmd, HWND hDialog, int editID, int editBuf
     case DIRECTORY_COMMAND_LEFT:
     case DIRECTORY_COMMAND_RIGHT:
     {
+
+        
+
         // left/right panel directory
         CFilesWindow* panel = (cmd == DIRECTORY_COMMAND_LEFT) ? MainWindow->LeftPanel : MainWindow->RightPanel;
+        if (panel != NULL)
+        {
+            panel->GetGeneralPath(path, 2 * MAX_PATH, TRUE);
+            setPathToEdit = TRUE;
+        }
+        break;
+    }
+    case DIRECTORY_COMMAND_BOTTOM_LEFT:
+    case DIRECTORY_COMMAND_BOTTOM_RIGHT:
+    {
+
+        
+
+        // left/right panel directory
+        CFilesWindow* panel = (cmd == DIRECTORY_COMMAND_BOTTOM_LEFT) ? MainWindow->BottomLeftPanel : MainWindow->BottomRightPanel;
         if (panel != NULL)
         {
             panel->GetGeneralPath(path, 2 * MAX_PATH, TRUE);

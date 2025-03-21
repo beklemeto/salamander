@@ -812,6 +812,20 @@ BOOL CDisconnectDialog::OnDisconnect()
                         isInPanel = TRUE;
                         panel = PANEL_RIGHT;
                     }
+                    if (MainWindow->BottomLeftPanel->Is(ptPluginFS) &&
+                        MainWindow->BottomLeftPanel->GetPluginFS()->Contains(pluginFS))
+                    {
+                        fs = MainWindow->BottomLeftPanel->GetPluginFS();
+                        isInPanel = TRUE;
+                        panel = PANEL_BOTTOM_LEFT;
+                    }
+                    if (fs == NULL && MainWindow->BottomRightPanel->Is(ptPluginFS) &&
+                        MainWindow->BottomRightPanel->GetPluginFS()->Contains(pluginFS))
+                    {
+                        fs = MainWindow->BottomRightPanel->GetPluginFS();
+                        isInPanel = TRUE;
+                        panel = PANEL_BOTTOM_RIGHT;
+                    }
                     if (fs == NULL)
                     {
                         CDetachedFSList* list = MainWindow->DetachedFSList;
@@ -1058,7 +1072,7 @@ void CDisconnectDialog::EnumConnections()
             activePanelFS = Panel->GetPluginFS();
             *fsListItem++ = activePanelFS;
         }
-        CFilesWindow* otherPanel = MainWindow->LeftPanel == Panel ? MainWindow->RightPanel : MainWindow->LeftPanel;
+        CFilesWindow* otherPanel = MainWindow->GetOtherPanel(Panel);
         CPluginFSInterfaceEncapsulation* nonactivePanelFS = NULL;
         if (otherPanel->Is(ptPluginFS))
         {

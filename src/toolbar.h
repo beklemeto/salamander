@@ -56,6 +56,19 @@ public:
 
 //*****************************************************************************
 //
+// CToolBarTextItem
+//
+
+class CToolBar;
+class CTBCustomizeDialog;
+
+class CToolBarTextItem : public CToolBarItem
+{
+    // : see whether somethin has to be changed...
+};
+
+//*****************************************************************************
+//
 // CToolBar
 //
 
@@ -260,6 +273,11 @@ enum CMainToolBarType
     mtbtMiddle,
     mtbtLeft,
     mtbtRight,
+    mtbtBottomLeft,
+    mtbtBottomRight,
+    
+    mtbtLeftSplitter,
+    mtbtRightSplitter
 };
 
 class CMainToolBar : public CToolBar

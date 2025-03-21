@@ -973,7 +973,7 @@ BOOL CFilesWindow::ReadDirectory(HWND parent, BOOL isRefresh)
             if (PluginData.NotEmpty())
             {
                 CSalamanderView view(this);
-                PluginData.SetupView(this == MainWindow->LeftPanel, &view, GetZIPPath(),
+                PluginData.SetupView(IsLeftPanel(), &view, GetZIPPath(),
                                      GetArchiveDir()->GetUpperDir(GetZIPPath()));
             }
 
@@ -1238,7 +1238,7 @@ BOOL CFilesWindow::ReadDirectory(HWND parent, BOOL isRefresh)
                 if (PluginData.NotEmpty())
                 {
                     CSalamanderView view(this);
-                    PluginData.SetupView(this == MainWindow->LeftPanel, &view, NULL, NULL);
+                    PluginData.SetupView(IsLeftPanel(), &view, NULL, NULL);
                 }
 
                 // setting of icon size for IconCache
@@ -1339,7 +1339,7 @@ BOOL CFilesWindow::ReadDirectory(HWND parent, BOOL isRefresh)
                     DWORD varPlacements[100];
                     int varPlacementsCount = 100;
                     if (PluginData.NotEmpty() &&
-                        PluginData.GetInfoLineContent(MainWindow->LeftPanel == this ? PANEL_LEFT : PANEL_RIGHT,
+                        PluginData.GetInfoLineContent(GetWindowPanelType(),
                                                       NULL, FALSE, 0, 0, TRUE, CQuadWord(0, 0), buff,
                                                       varPlacements, varPlacementsCount))
                     {
@@ -2505,6 +2505,11 @@ BOOL CFilesWindow::ChangePathToDrvType(HWND parent, int driveType, const char* d
         }
     }
     if (driveType == drvtMyDocuments && GetMyDocumentsOrDesktopPath(path, MAX_PATH) ||
+        driveType == drvtDesktop && GetDesktopPath(path, MAX_PATH) ||
+        driveType == drvtDownloads && GetDownloadsPath(path, MAX_PATH) ||
+        driveType == drvtMyVideos && GetMyVideosPath(path, MAX_PATH) ||
+        driveType == drvtMyPictures && GetMyPicturesPath(path, MAX_PATH) ||
+        driveType == drvtMyMusic && GetMyMusicPath(path, MAX_PATH) ||
         driveType == drvtGoogleDrive && ShellIconOverlays.GetPathForGoogleDrive(path, MAX_PATH) ||
         driveType == drvtDropbox && strcpy_s(path, DropboxPath) == 0 ||
         driveType == drvtOneDrive && strcpy_s(path, OneDrivePath) == 0 ||
@@ -2521,7 +2526,7 @@ void CFilesWindow::ChangeDrive(char drive)
     //--- DefaultDire refresh
     MainWindow->UpdateDefaultDir(MainWindow->GetActivePanel() != this);
     //---  possible disk selection from the dialog
-    CFilesWindow* anotherPanel = (Parent->LeftPanel == this ? Parent->RightPanel : Parent->LeftPanel);
+    CFilesWindow* anotherPanel = Parent->GetOtherPanel(this);
     if (drive == 0)
     {
         CDriveTypeEnum driveType = drvtUnknow; // dummy
@@ -2547,6 +2552,11 @@ void CFilesWindow::ChangeDrive(char drive)
         switch (driveType)
         {
         case drvtMyDocuments:
+        case drvtDownloads:
+        case drvtDesktop:
+        case drvtMyVideos:
+        case drvtMyPictures:
+        case drvtMyMusic:
         case drvtGoogleDrive:
         case drvtDropbox:
         case drvtOneDrive:

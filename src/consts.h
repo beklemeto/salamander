@@ -568,6 +568,7 @@ void GetFileSizeFromPanel(DWORD validFileData, CPluginDataInterfaceEncapsulation
                           const CFileData* f, BOOL isDir, CQuadWord* size, BOOL* validSize);
 
 void DrawSplitLine(HWND HWindow, int newDragSplitX, int oldDragSplitX, RECT client);
+void DrawHorizontalSplitLine(HWND HWindow, int newDragSplitY, int oldDragSplitY, RECT client);
 BOOL InitializeCheckThread(); // inicializace threadu pro CFilesWindow::CheckPath()
 void ReleaseCheckThreads();   // uvolneni threadu pro CFilesWindow::CheckPath()
 void InitDefaultDir();        // inicializace pole DefaultDir (posledni navstivene cesty na vsech drivech)
@@ -1336,6 +1337,7 @@ extern BOOL Windows7AndLater;     // Windows 7 nebo pozdejsi
 extern BOOL Windows8AndLater;     // Windows 8 nebo pozdejsi
 extern BOOL Windows8_1AndLater;   // Windows 8.1 nebo pozdejsi
 extern BOOL Windows10AndLater;    // Windows 10 nebo pozdejsi
+extern BOOL Windows11AndLater;    // Windows 11 nebo pozdejsi
 
 extern BOOL Windows64Bit; // x64 verze Windows
 
@@ -1917,10 +1919,20 @@ extern DWORD EnablerLeftForward;          // je v historii leveho panelu dostupn
 extern DWORD EnablerRightForward;         // je v historii praveho panelu dostupny forward?
 extern DWORD EnablerLeftBackward;         // je v historii leveho panelu dostupny backward?
 extern DWORD EnablerRightBackward;        // je v historii praveho panelu dostupny backward?
+extern DWORD EnablerBottomLeftUpDir;      // existuje v levem panelu parent directory?
+extern DWORD EnablerBottomRightUpDir;     // existuje v pravem panelu parent directory?
+extern DWORD EnablerBottomLeftRootDir;    // nejsme jeste v levem panelu v rootu? (pozor: UNC root ma updir, ale je to root)
+extern DWORD EnablerBottomRightRootDir;   // nejsme jeste v pravem panelu v rootu? (pozor: UNC root ma updir, ale je to root)
+extern DWORD EnablerBottomLeftForward;    // je v historii leveho panelu dostupny forward?
+extern DWORD EnablerBottomRightForward;   // je v historii praveho panelu dostupny forward?
+extern DWORD EnablerBottomLeftBackward;   // je v historii leveho panelu dostupny backward?
+extern DWORD EnablerBottomRightBackward;  // je v historii praveho panelu dostupny backward?
 extern DWORD EnablerFileHistory;          // je v view/edit historii dostupny soubor?
 extern DWORD EnablerDirHistory;           // je v directory historii dostupny adresar?
 extern DWORD EnablerCustomizeLeftView;    // je mozne konfigurovat sloupce pro levy pohled?
 extern DWORD EnablerCustomizeRightView;   // je mozne konfigurovat sloupce pro pravy pohled?
+extern DWORD EnablerCustomizeBottomLeftView;    // je mozne konfigurovat sloupce pro levy pohled?
+extern DWORD EnablerCustomizeBottomRightView;   // je mozne konfigurovat sloupce pro pravy pohled?
 extern DWORD EnablerDriveInfo;            // je mozne zobrazit Drive Info?
 extern DWORD EnablerCreateDir;            // panel je disk nebo FS (s podporou create-dir)
 extern DWORD EnablerViewFile;             // focus je na souboru && panel je disk, archiv nebo FS (s podporou view-file)
@@ -2273,6 +2285,11 @@ BOOL ContainsString(TIndirectArray<char>* usedNames, const char* name, int* inde
 // 'pathLen' udava velikost bufferu 'path'; funkce zajisti terminovani retezce i v
 // pripade zkraceni
 BOOL GetMyDocumentsOrDesktopPath(char* path, int pathLen);
+BOOL GetDownloadsPath(char* path, int pathLen);
+BOOL GetDesktopPath(char* path, int pathLen);
+BOOL GetMyVideosPath(char* path, int pathLen);
+BOOL GetMyPicturesPath(char* path, int pathLen);
+BOOL GetMyMusicPath(char* path, int pathLen);
 
 // To optimize performance, it is good practice for applications to detect whether they
 // are running in a Terminal Services client session. For example, when an application
@@ -2296,6 +2313,11 @@ extern BOOL ChangeLeftPanelToFixedWhenIdleInProgress; // TRUE = prave se meni ce
 extern BOOL ChangeLeftPanelToFixedWhenIdle;
 extern BOOL ChangeRightPanelToFixedWhenIdleInProgress; // TRUE = prave se meni cesta, nastaveni ChangeRightPanelToFixedWhenIdle na TRUE je zbytecne
 extern BOOL ChangeRightPanelToFixedWhenIdle;
+extern BOOL ChangeBottomLeftPanelToFixedWhenIdleInProgress; // TRUE = prave se meni cesta, nastaveni ChangeLeftPanelToFixedWhenIdle na TRUE je zbytecne
+extern BOOL ChangeBottomLeftPanelToFixedWhenIdle;
+extern BOOL ChangeBottomRightPanelToFixedWhenIdleInProgress; // TRUE = prave se meni cesta, nastaveni ChangeRightPanelToFixedWhenIdle na TRUE je zbytecne
+extern BOOL ChangeBottomRightPanelToFixedWhenIdle;
+
 extern BOOL OpenCfgToChangeIfPathIsInaccessibleGoTo; // TRUE = v idle otevre konfiguraci na Drives a focusne "If path in panel is inaccessible, go to:"
 
 // root drivu (i UNC), pro ktery je zobrazen messagebox "drive not ready" s Retry+Cancel

@@ -1371,7 +1371,8 @@ void CFilesWindow::EmailFiles()
 
 BOOL CFilesWindow::OpenFocusedInOtherPanel(BOOL activate)
 {
-    CFilesWindow* otherPanel = (this == MainWindow->LeftPanel) ? MainWindow->RightPanel : MainWindow->LeftPanel;
+    CFilesWindow* otherPanel = MainWindow->GetOtherPanel(this);
+    
     if (otherPanel == NULL)
         return FALSE;
 
@@ -1440,7 +1441,7 @@ BOOL CFilesWindow::OpenFocusedInOtherPanel(BOOL activate)
                         failReason == CHPPFR_FILENAMEFOCUSED))
             {
                 // pokud se cesta ve druhem panelu zmenila, aktivujeme jej
-                MainWindow->ChangePanel();
+                MainWindow->ChangePanel(otherPanel);
                 return TRUE;
             }
         }
@@ -1450,7 +1451,7 @@ BOOL CFilesWindow::OpenFocusedInOtherPanel(BOOL activate)
 
 void CFilesWindow::ChangePathToOtherPanelPath()
 {
-    CFilesWindow* panel = (this == MainWindow->LeftPanel) ? MainWindow->RightPanel : MainWindow->LeftPanel;
+    CFilesWindow* panel = MainWindow->GetOtherPanel(this);
     if (panel == NULL)
         return;
 

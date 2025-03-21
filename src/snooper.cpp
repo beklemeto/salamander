@@ -255,10 +255,14 @@ unsigned ThreadSnooperBody(void* /*param*/) // nevolat funkce hl. threadu (ani T
                 // jeste posleme notifikaci o ukonceni suspend modu
                 if (MainWindowCS.LockIfNotClosed())
                 {
-                    if (MainWindow != NULL && MainWindow->LeftPanel != NULL && MainWindow->RightPanel != NULL)
+                    if (MainWindow != NULL && 
+                        MainWindow->LeftPanel != NULL && MainWindow->RightPanel != NULL &&
+                        MainWindow->BottomLeftPanel != NULL && MainWindow->BottomRightPanel != NULL)
                     {
                         PostMessage(MainWindow->LeftPanel->HWindow, WM_USER_SM_END_NOTIFY, 0, 0);
                         PostMessage(MainWindow->RightPanel->HWindow, WM_USER_SM_END_NOTIFY, 0, 0);
+                        PostMessage(MainWindow->BottomLeftPanel->HWindow, WM_USER_SM_END_NOTIFY, 0, 0);
+                        PostMessage(MainWindow->BottomRightPanel->HWindow, WM_USER_SM_END_NOTIFY, 0, 0);
                     }
                     MainWindowCS.Unlock();
                 }

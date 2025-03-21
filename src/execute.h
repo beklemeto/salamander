@@ -95,6 +95,8 @@ struct CUserMenuValidationData // extra data pro validaci User Menu: pole Argume
     BOOL UsesListOfSelFullNames; // TRUE = tento parametr se pouziva (musime overit jestli neni prilis dlouhy)
     BOOL UsesFullPathLeft;       // TRUE = tento parametr se pouziva (musime overit jestli je definovan)
     BOOL UsesFullPathRight;      // TRUE = tento parametr se pouziva (musime overit jestli je definovan)
+    BOOL UsesFullPathBottomLeft; // TRUE = tento parametr se pouziva (musime overit jestli je definovan)
+    BOOL UsesFullPathBottomRight; // TRUE = tento parametr se pouziva (musime overit jestli je definovan)
     BOOL UsesFullPathInactive;   // TRUE = tento parametr se pouziva (musime overit jestli je definovan)
 
     BOOL MustHandleItemsAsGroup;     // TRUE = s polozkami se musi pracovat jako se skupinou: ListOfSelectedNames, ListOfSelectedFullNames, FileToCompareXXX, DirToCompareXXX
@@ -113,6 +115,8 @@ struct CUserMenuAdvancedData // extra data jen pro User Menu: pole Arguments
     BOOL ListOfSelFullNamesIsEmpty;             // TRUE = prazdny ListOfSelFullNames
     char FullPathLeft[MAX_PATH];                // prazdny string = neni definovana (jsme ve Findu nebo je v panelu archiv/FS)
     char FullPathRight[MAX_PATH];               // prazdny string = neni definovana (jsme ve Findu nebo je v panelu archiv/FS)
+    char FullPathBottomLeft[MAX_PATH];                // prazdny string = neni definovana (jsme ve Findu nebo je v panelu archiv/FS)
+    char FullPathBottomRight[MAX_PATH];               // prazdny string = neni definovana (jsme ve Findu nebo je v panelu archiv/FS)
     const char* FullPathInactive;               // ukazuje do FullPathLeft nebo FullPathRight: prazdny string = neni definovana (jsme ve Findu nebo je v panelu archiv/FS)
     char CompareName1[MAX_PATH];                // prvni full-name pro compare (soubor nebo adresar)
     char CompareName2[MAX_PATH];                // druhy full-name pro compare (soubor nebo adresar)

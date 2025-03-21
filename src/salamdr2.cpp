@@ -2083,6 +2083,64 @@ void DrawSplitLine(HWND HWindow, int newDragSplitX, int oldDragSplitX, RECT clie
     HANDLES(ReleaseDC(HWindow, dc));
 }
 
+void DrawHorizontalSplitLine(HWND HWindow, int newDragSplitY, int oldDragSplitY, RECT client)
+{
+    if (DragFullWindows)
+        return;
+
+    RECT wr;
+    POINT p;
+    p.x = 0;
+    p.y = 0;
+    ClientToScreen(HWindow, &p);
+    GetWindowRect(HWindow, &wr);
+    int xOffset = wr.left - p.x;
+    int yOffset = wr.top - p.y;
+
+    HDC dc = HANDLES(GetWindowDC(HWindow));
+    SetViewportOrgEx(dc, -xOffset, -yOffset, &p);
+
+    HBRUSH oldBrush = (HBRUSH)SelectObject(dc, HDitherBrush);
+    HPEN oldPen = (HPEN)SelectObject(dc, HANDLES(GetStockObject(NULL_PEN)));
+    int oldROP = SetROP2(dc, R2_XORPEN); // budeme ANDovat
+
+    int splitThick = MainWindow->GetHorizSplitBarHeight() + 1;
+    int t0 = newDragSplitY;
+    int b0 = newDragSplitY + splitThick;
+    if (newDragSplitY == -1)
+        b0 = t0 = -1;
+    if (oldDragSplitY != -1) // vypocet pruhu pro invalidate
+    {
+        int t1 = oldDragSplitY;
+        int b1 = oldDragSplitY + splitThick;
+        if (t1 >= t0 && t1 < b0)
+        {
+            int tmp = t1;
+            t1 = b0 - 1;
+            b0 = tmp + 1;
+        }
+        if (b1 > t0 && b1 <= b0)
+        {
+            int tmp = b1;
+            b1 = t0 + 1;
+            t0 = tmp - 1;
+        }
+        if (t1 <= b1)
+        {
+            Rectangle(dc, client.left, t1, client.right, b1);
+        }
+    }
+    if (t0 != -1 || b0 != -1)
+    {
+        Rectangle(dc, client.left, t0, client.right, b0);
+    }
+
+    SetROP2(dc, oldROP);
+    SelectObject(dc, oldPen);
+    SelectObject(dc, oldBrush);
+    HANDLES(ReleaseDC(HWindow, dc));
+}
+
 // ****************************************************************************
 
 BOOL CreateKey(HKEY hKey, const char* name, HKEY& createdKey)

@@ -72,6 +72,8 @@ struct CCommandLineParams
     DWORD RequestTimestamp;      // GetTickCount() hodnota ze chvile, kdy byl zakladan pozadavek pro aktivaci
     char LeftPath[2 * MAX_PATH]; // cesty do panelu (levy, pravy, pripadne aktivni); pokud jsou prazdne, nemaji se nastavit
     char RightPath[2 * MAX_PATH];
+    char BottomLeftPath[2 * MAX_PATH]; // cesty do panelu (levy, pravy, pripadne aktivni); pokud jsou prazdne, nemaji se nastavit
+    char BottomRightPath[2 * MAX_PATH];
     char ActivePath[2 * MAX_PATH];
     DWORD ActivatePanel;         // ktery panel se ma aktivovat 0-zadny, 1-levy, 2-pravy
     BOOL SetTitlePrefix;         // pokud je TRUE, nastavi se prefix titulku podle TitlePrefix

@@ -41,6 +41,8 @@
 #define IDH_VIEWERINTRO     140
 #define IDH_GROUPPOLICY     141
 #define IDH_PWDMANAGER      142
+#define IDH_LEFT_HORIZ_SPLITBAR    143
+#define IDH_RIGHT_HORIZ_SPLITBAR   144
 // virtualni IDcka - END
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! FREESPACE
@@ -70,6 +72,20 @@
 #define CM_RIGHTATTR        698
 #define CM_RIGHTTYPE        699
 
+#define CM_BOTTOMLEFTNAME       1688
+#define CM_BOTTOMLEFTEXT        1689
+#define CM_BOTTOMLEFTTIME       1690
+#define CM_BOTTOMLEFTSIZE       1691
+#define CM_BOTTOMLEFTATTR       1692
+#define CM_BOTTOMLEFTTYPE       1693
+          
+#define CM_BOTTOMRIGHTNAME  1694
+#define CM_BOTTOMRIGHTEXT   1695
+#define CM_BOTTOMRIGHTTIME  1696
+#define CM_BOTTOMRIGHTSIZE  1697
+#define CM_BOTTOMRIGHTATTR  1698
+#define CM_BOTTOMRIGHTTYPE  1699
+
 #define CM_ACTIVENAME       700
 #define CM_ACTIVEEXT        701
 #define CM_ACTIVETIME       702
@@ -79,6 +95,8 @@
 
 #define CM_LCHANGEDRIVE     707
 #define CM_RCHANGEDRIVE     708
+#define CM_BLCHANGEDRIVE        1707
+#define CM_BRCHANGEDRIVE        1708
 
 #define CM_CLIPCOPYFULLNAME 709
 #define CM_CLIPCOPYNAME     710
@@ -92,8 +110,16 @@
 #define CM_LEFTDIRLINE      722
 #define CM_RIGHTDIRLINE     723
 
+#define CM_BOTTOMLEFTSTATUS       1720
+#define CM_BOTTOMRIGHTSTATUS      1721
+#define CM_BOTTOMLEFTDIRLINE      1722
+#define CM_BOTTOMRIGHTDIRLINE     1723
+
 #define CM_LEFTREFRESH      724
 #define CM_RIGHTREFRESH     725
+
+#define CM_BOTTOMLEFTREFRESH      1724
+#define CM_BOTTOMRIGHTREFRESH     1725
 
 #define CM_REFRESHASSOC     726
 
@@ -158,17 +184,30 @@
 #define CM_CLIPPASTELINKS   776
 #define CM_LCHANGEFILTER    777
 #define CM_RCHANGEFILTER    778
+#define CM_BLCHANGEFILTER    1777
+#define CM_BRCHANGEFILTER    1778
 #define CM_CHANGEFILTER     779
 #define CM_OPENHOTPATHS     780
 #define CM_OPENHOTPATHSDROP 781
 #define CM_OPEN_FOLDER_DROP 782
-#define CM_SWAPPANELS       783
+#define CM_SWAPPANELS       783   //  still needed for plugin compatibility
+#define CM_VSWAP_LEFT           11783
+#define CM_VSWAP_RIGHT          11784
+#define CM_VSWAP_BOTTOMLEFT     11785
+#define CM_VSWAP_BOTTOMRIGHT    11786
+#define CM_HSWAP_LEFT           11787
+#define CM_HSWAP_RIGHT          11788
+#define CM_HSWAP_BOTTOMLEFT     11789
+#define CM_HSWAP_BOTTOMRIGHT    11790
 #define CM_ALWAYSONTOP      784
 
 #define CM_LAST_PLUGIN_CMD  785
 
 #define CM_LCUSTOMIZEVIEW   786
 #define CM_RCUSTOMIZEVIEW   787
+
+#define CM_BOTTOMLCUSTOMIZEVIEW   1786
+#define CM_BOTTOMRCUSTOMIZEVIEW   1787
 
 #define CM_SELECTBYFOCUSEDNAME   788
 #define CM_UNSELECTBYFOCUSEDNAME 789
@@ -187,6 +226,8 @@
 #define CM_CUSTOMIZETOP          804
 #define CM_CUSTOMIZELEFT         805
 #define CM_CUSTOMIZERIGHT        806
+#define CM_CUSTOMIZEBOTTOMLEFT         1805
+#define CM_CUSTOMIZEBOTTOMRIGHT        1806
 #define CM_CUSTOMIZEUM           807
 
 #define CM_NEWMENU               808
@@ -219,9 +260,17 @@
 #define CM_RROOTDIR            827
 #define CM_LDRIVEINFO          828
 #define CM_RDRIVEINFO          829
+#define CM_BLPARENTDIR          1824
+#define CM_BLROOTDIR            1825
+#define CM_BRPARENTDIR          1826
+#define CM_BRROOTDIR            1827
+#define CM_BLDRIVEINFO          1828
+#define CM_BRDRIVEINFO          1829
 
 #define CM_LEFTHEADER          830
 #define CM_RIGHTHEADER         831
+#define CM_BOTTOMLEFTHEADER          1830
+#define CM_BOTTOMRIGHTHEADER         1831
 
 #define CM_ACTIVEBACK          832
 #define CM_ACTIVEFORWARD       833
@@ -229,6 +278,10 @@
 #define CM_LFORWARD            835
 #define CM_RBACK               836
 #define CM_RFORWARD            837
+#define CM_BLBACK               1834
+#define CM_BLFORWARD            1835
+#define CM_BRBACK               1836
+#define CM_BRFORWARD            1837
 
 #define CM_AFOCUSSHORTCUT      838
 
@@ -244,6 +297,8 @@
 #define CM_ACTIVE_AS_OTHER     847
 #define CM_LEFT_AS_OTHER       848
 #define CM_RIGHT_AS_OTHER      849
+#define CM_BOTTOMLEFT_AS_OTHER       1848
+#define CM_BOTTOMRIGHT_AS_OTHER      1849
 
 #define CM_PACK                850
 #define CM_UNPACK              851
@@ -267,6 +322,8 @@
 #define CM_ACTIVE_CHANGEDIR    862
 #define CM_LEFT_CHANGEDIR      863
 #define CM_RIGHT_CHANGEDIR     864
+#define CM_BOTTOMLEFT_CHANGEDIR      1863
+#define CM_BOTTOMRIGHT_CHANGEDIR     1864
 
 #define CM_RESELECT            865
 
@@ -430,6 +487,10 @@
 #define CM_LEFTHOTPATH_MAX       2469
 #define CM_RIGHTHOTPATH_MIN      2470    // goto hot path X (rezervace pro HOT_PATHS_COUNT)
 #define CM_RIGHTHOTPATH_MAX      2499
+#define CM_BOTTOMLEFTHOTPATH_MIN       12430    // goto hot path X (rezervace pro HOT_PATHS_COUNT)
+#define CM_BOTTOMLEFTHOTPATH_MAX       12469
+#define CM_BOTTOMRIGHTHOTPATH_MIN      12470    // goto hot path X (rezervace pro HOT_PATHS_COUNT)
+#define CM_BOTTOMRIGHTHOTPATH_MAX      12499
 
 //#define IDD_TIPOFTHEDAY            2720
 
@@ -437,6 +498,10 @@
 #define CM_LEFTHISTORYPATH_MAX     2849
 #define CM_RIGHTHISTORYPATH_MIN    2850    // historie adresaru pro menu Go To
 #define CM_RIGHTHISTORYPATH_MAX    2859
+#define CM_BOTTOMLEFTHISTORYPATH_MIN     12840    // historie adresaru pro menu Go To
+#define CM_BOTTOMLEFTHISTORYPATH_MAX     12849
+#define CM_BOTTOMRIGHTHISTORYPATH_MIN    12850    // historie adresaru pro menu Go To
+#define CM_BOTTOMRIGHTHISTORYPATH_MAX    12859
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! FREESPACE
 
@@ -445,16 +510,32 @@
 #define CM_LEFTSORTBY_MAX          2909
 #define CM_RIGHTSORTBY_MIN         2910
 #define CM_RIGHTSORTBY_MAX         2929
+#define CM_BOTTOMLEFTSORTBY_MIN          12890
+#define CM_BOTTOMLEFTSORTBY_MAX          12909
+#define CM_BOTTOMRIGHTSORTBY_MIN         12910
+#define CM_BOTTOMRIGHTSORTBY_MAX         12929
 
 #define CM_SKILLLEVEL              2930
 
 #define CM_ACTIVEVIEWMODE          2931
 #define CM_LEFTVIEWMODE            2932
 #define CM_RIGHTVIEWMODE           2933
+#define CM_LEFTVIEWMODE            2932
+#define CM_RIGHTVIEWMODE           2933
+#define CM_BOTTOMLEFTVIEWMODE            12932
+#define CM_BOTTOMRIGHTVIEWMODE           12933
+#define CM_BOTTOMLEFTVIEWMODE            12932
+#define CM_BOTTOMRIGHTVIEWMODE           12933
 
 #define CM_ACTIVEZOOMPANEL         2934  // maximalizuje aktivni panel nebo ho vraci zpet
 #define CM_LEFTZOOMPANEL           2935
 #define CM_RIGHTZOOMPANEL          2936
+#define CM_LEFTZOOMPANEL           2935
+#define CM_RIGHTZOOMPANEL          2936
+#define CM_BOTTOMLEFTZOOMPANEL           12935
+#define CM_BOTTOMRIGHTZOOMPANEL          12936
+#define CM_BOTTOMLEFTZOOMPANEL           12935
+#define CM_BOTTOMRIGHTZOOMPANEL          12936
 
 #define CM_FULLSCREEN              2937  // maximalizuje hlavni okno a vraci ho zpet
 
@@ -475,6 +556,8 @@
 #define CM_ACTIVE_SMARTMODE        2951
 #define CM_LEFT_SMARTMODE          2952
 #define CM_RIGHT_SMARTMODE         2953
+#define CM_BOTTOMLEFT_SMARTMODE          12952
+#define CM_BOTTOMRIGHT_SMARTMODE         12953
 
 #define CM_ACTIVEMODE_1            2970  // Alt+1..0 pro volbu rezimu aktivniho pohledu
 #define CM_ACTIVEMODE_2            2971
@@ -488,6 +571,14 @@
 #define CM_RIGHTMODE_2             2991
 #define CM_RIGHTMODE_3             2992
 #define CM_RIGHTMODE_10            2999
+#define CM_BOTTOMLEFTMODE_1              12980  // volba rezimu leveho pohledu
+#define CM_BOTTOMLEFTMODE_2              12981
+#define CM_BOTTOMLEFTMODE_3              12982
+#define CM_BOTTOMLEFTMODE_10             12989
+#define CM_BOTTOMRIGHTMODE_1             12990  // volba rezimu praveho pohledu
+#define CM_BOTTOMRIGHTMODE_2             12991
+#define CM_BOTTOMRIGHTMODE_3             12992
+#define CM_BOTTOMRIGHTMODE_10            12999
 
 #define CM_USERMENU_MIN         3000     // interval vyhrazeny pro prikazy user-menu
 #define CM_USERMENU_MAX         3499
@@ -518,6 +609,13 @@
 #define CML_LEFT_VISIBLE        5506
 #define CML_LEFT_GO             5507
 
+#define CML_BOTTOMLEFT                15501
+#define CML_BOTTOMLEFT_CHANGEDRIVE    15502
+#define CML_BOTTOMLEFT_VIEWS1         15503
+#define CML_BOTTOMLEFT_VIEWS2         15504
+#define CML_BOTTOMLEFT_SORTBY         15505
+#define CML_BOTTOMLEFT_VISIBLE        15506
+#define CML_BOTTOMLEFT_GO             15507
 
 #define CML_FILES               5509
 #define CML_FILES_NEW           5511
@@ -546,6 +644,14 @@
 #define CML_RIGHT_SORTBY        5544
 #define CML_RIGHT_VISIBLE       5545
 #define CML_RIGHT_GO            5546
+
+#define CML_BOTTOMRIGHT               15540
+#define CML_BOTTOMRIGHT_CHANGEDRIVE   15541
+#define CML_BOTTOMRIGHT_VIEWS1        15542
+#define CML_BOTTOMRIGHT_VIEWS2        15543
+#define CML_BOTTOMRIGHT_SORTBY        15544
+#define CML_BOTTOMRIGHT_VISIBLE       15545
+#define CML_BOTTOMRIGHT_GO            15546
 
 #define CML_HELP                5550
 #define CML_HELP_ABOUTPLUGINS   5551
@@ -591,6 +697,8 @@
 #define CM_FILEEND            6057
 #define CM_LEFT               6058
 #define CM_RIGHT              6059
+#define CM_BOTTOMLEFT               16058
+#define CM_BOTTOMRIGHT              16059
 #define CM_TO_HEX             6060   // pozor - musi byt o 1 mensi nez CM_TO_TEXT
 #define CM_TO_TEXT            6061   // pozor - musi byt o 1 vetsi nez CM_TO_HEX
 #define CM_COPYTOCLIP         6062
@@ -605,6 +713,8 @@
 #define CM_PREVCODING         6071
 #define CM_FASTLEFT           6072
 #define CM_FASTRIGHT          6073
+#define CM_BOTTOMFASTLEFT           16072
+#define CM_BOTTOMFASTRIGHT          16073
 #define CM_VIEWER_CONFIG      6074
 #define CM_VIEWERHLP_KEYBOARD 6078
 #define CM_RECOGNIZE_CODEPAGE 6079
@@ -623,6 +733,8 @@
 #define CM_GOTOOFFSET         6092
 #define CM_EXTSEL_LEFT        6093
 #define CM_EXTSEL_RIGHT       6094
+#define CM_EXTSEL_BOTTOMLEFT        16093
+#define CM_EXTSEL_BOTTOMRIGHT       16094
 #define CM_EXTSEL_UP          6095
 #define CM_EXTSEL_DOWN        6096
 #define CM_EXTSEL_HOME        6097

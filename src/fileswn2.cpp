@@ -294,7 +294,8 @@ void CFilesWindow::Execute(int index)
                                 s++;
                             if (*s == '\\')
                                 *s = 0;
-                            nethoodPlugin->EnsureShareExistsOnServer(HWindow, this == MainWindow->LeftPanel ? PANEL_LEFT : PANEL_RIGHT,
+                            
+                            nethoodPlugin->EnsureShareExistsOnServer(HWindow, GetWindowPanelType(),
                                                                      path + 2, focusName);
                             ChangePathToPluginFS(doublePath, path, -1, focusName);
                             if (Is(ptPluginFS))
@@ -502,7 +503,7 @@ void CFilesWindow::Execute(int index)
                 CPluginInterfaceForFSEncapsulation* ifaceForFS = GetPluginFS()->GetPluginInterfaceForFS();
                 char fsNameBuf[MAX_PATH]; // GetPluginFS() muze prestt existovat, radsi dame fsName do lokalniho bufferu
                 lstrcpyn(fsNameBuf, GetPluginFS()->GetPluginFSName(), MAX_PATH);
-                ifaceForFS->ExecuteOnFS(MainWindow->LeftPanel == this ? PANEL_LEFT : PANEL_RIGHT,
+                ifaceForFS->ExecuteOnFS(GetWindowPanelType(),
                                         GetPluginFS()->GetInterface(), fsNameBuf,
                                         GetPluginFS()->GetPluginFSNameIndex(), *file, isDir);
             }
@@ -823,10 +824,18 @@ void CFilesWindow::DisconnectNet()
                        MainWindow->LeftPanel->GetPath()[0] != '\\';   // ne UNC
     BOOL releaseRight = MainWindow->RightPanel->GetNetworkDrive() &&  // sitovy disk (jen ptDisk)
                         MainWindow->RightPanel->GetPath()[0] != '\\'; // ne UNC
+    BOOL releaseBottomLeft = MainWindow->BottomLeftPanel->GetNetworkDrive() && // sitovy disk (jen ptDisk)
+                             MainWindow->BottomLeftPanel->GetPath()[0] != '\\'; // ne UNC
+    BOOL releaseBottomRight = MainWindow->BottomRightPanel->GetNetworkDrive() && // sitovy disk (jen ptDisk)
+                              MainWindow->BottomRightPanel->GetPath()[0] != '\\'; // ne UNC
     if (releaseLeft)
         MainWindow->LeftPanel->HandsOff(TRUE);
     if (releaseRight)
         MainWindow->RightPanel->HandsOff(TRUE);
+    if (releaseBottomLeft)
+        MainWindow->BottomLeftPanel->HandsOff(TRUE);
+    if (releaseBottomRight)
+        MainWindow->BottomRightPanel->HandsOff(TRUE);
 
     //  Pod Windows XP je WNetDisconnectDialog dialog nemodalni. Uzivatelum zapadnul za Salamandera
     //  a oni se divili proc nechodi akceleratory. Pak pri zavirani Salamander padnul v teto metode
@@ -845,11 +854,19 @@ void CFilesWindow::DisconnectNet()
         MainWindow->LeftPanel->HandsOff(FALSE);
     if (releaseRight)
         MainWindow->RightPanel->HandsOff(FALSE);
+    if (releaseBottomLeft)
+        MainWindow->BottomLeftPanel->HandsOff(FALSE);
+    if (releaseBottomRight)
+        MainWindow->BottomRightPanel->HandsOff(FALSE);
 
     if (MainWindow->LeftPanel->CheckPath(FALSE) != ERROR_SUCCESS)
         MainWindow->LeftPanel->ChangeToRescuePathOrFixedDrive(MainWindow->LeftPanel->HWindow);
     if (MainWindow->RightPanel->CheckPath(FALSE) != ERROR_SUCCESS)
         MainWindow->RightPanel->ChangeToRescuePathOrFixedDrive(MainWindow->RightPanel->HWindow);
+    if (MainWindow->BottomLeftPanel->CheckPath(FALSE) != ERROR_SUCCESS)
+        MainWindow->BottomLeftPanel->ChangeToRescuePathOrFixedDrive(MainWindow->BottomLeftPanel->HWindow);
+    if (MainWindow->BottomRightPanel->CheckPath(FALSE) != ERROR_SUCCESS)
+        MainWindow->BottomRightPanel->ChangeToRescuePathOrFixedDrive(MainWindow->BottomRightPanel->HWindow);
 
     EndSuspendMode(); // ted uz zase cmuchal nastartuje
 }
@@ -1075,7 +1092,7 @@ BOOL CFilesWindow::SelectViewTemplate(int templateIndex, BOOL canRefreshPath,
         if (PluginData.NotEmpty())
         {
             CSalamanderView view(this);
-            PluginData.SetupView(this == MainWindow->LeftPanel,
+            PluginData.SetupView(IsLeftPanel(),
                                  &view, Is(ptZIPArchive) ? GetZIPPath() : NULL,
                                  Is(ptZIPArchive) ? GetArchiveDir()->GetUpperDir(GetZIPPath()) : NULL);
         }
@@ -1152,7 +1169,7 @@ void CFilesWindow::ItemFocused(int index)
         {
             if (PluginData.NotEmpty())
             {
-                if (PluginData.GetInfoLineContent(MainWindow->LeftPanel == this ? PANEL_LEFT : PANEL_RIGHT,
+                if (PluginData.GetInfoLineContent(GetWindowPanelType(),
                                                   f, index < Dirs->Count, 0, 0, TRUE, CQuadWord(0, 0), buff,
                                                   varPlacements, varPlacementsCount))
                 {
@@ -1251,7 +1268,7 @@ BOOL CFilesWindow::PrepareCloseCurrentPath(HWND parent, BOOL canForce, BOOL canD
             // pokud muzou byt v diskcache editovane soubory nebo tento archiv neni otevren
             // i v druhem panelu, vyhodime jeho cachovane soubory, pri dalsim otevreni se bude
             // znovu vypakovavat (archiv muze byt mezitim editovan)
-            CFilesWindow* another = (MainWindow->LeftPanel == this) ? MainWindow->RightPanel : MainWindow->LeftPanel;
+            CFilesWindow* another = MainWindow->GetOtherPanel(this);
             if (someFilesChanged || !another->Is(ptZIPArchive) || StrICmp(another->GetZIPArchive(), GetZIPArchive()) != 0)
             {
                 StrICpy(buf, GetZIPArchive()); // v disk-cache je jmeno archivu malymi pismeny (umozni case-insensitive porovnani jmena z Windows file systemu)
@@ -3441,7 +3458,7 @@ void CFilesWindow::RefreshDiskFreeSpace(BOOL check, BOOL doNotRefreshOtherPanel)
                 // disk-free-space i ve vedlejsim panelu (neni dokonale - idealni by bylo
                 // testovat, jestli jsou cesty na stejnem svazku, ale to by bylo moc pomale,
                 // toto zjednoduseni bude pro obycejne pouziti bohate stacit)
-                CFilesWindow* otherPanel = (MainWindow->LeftPanel == this) ? MainWindow->RightPanel : MainWindow->LeftPanel;
+                CFilesWindow* otherPanel = MainWindow->GetOtherPanel(this);
                 if (otherPanel->Is(ptDisk) && HasTheSameRootPath(GetPath(), otherPanel->GetPath()))
                     otherPanel->RefreshDiskFreeSpace(TRUE, TRUE /* jinak nekonecna rekurze */);
             }
@@ -3608,6 +3625,7 @@ void CFilesWindow::RefreshListBox(int suggestedXOffset,
         int columnWidthTime = 0;
         int columnWidthAttr = 0;
         int columnWidthDesc = 0;
+        int columnWidthAge = 0;
 
         // zjistime, ktere sloupce jsou skutecne zobrazene (plugin mohl sloupce zmodifikovat)
         BOOL extColumnIsVisible = FALSE;
@@ -3640,6 +3658,9 @@ void CFilesWindow::RefreshListBox(int suggestedXOffset,
                     break;
                 case COLUMN_ID_TIME:
                     autoWidthColumns |= VIEW_SHOW_TIME;
+                    break;
+                case COLUMN_ID_AGE:
+                    autoWidthColumns |= VIEW_SHOW_AGE;
                     break;
                 case COLUMN_ID_ATTRIBUTES:
                     autoWidthColumns |= VIEW_SHOW_ATTRIBUTES;
@@ -3929,6 +3950,19 @@ void CFilesWindow::RefreshListBox(int suggestedXOffset,
                 columnWidthTime = act.cx;
         }
 
+        // age
+        if (autoWidthColumns & VIEW_SHOW_AGE)
+        {
+            //  todo: calculate the age column width (what is a good approximation??)
+            
+            sprintf(text, "%u%s", 356, "dd");
+            GetTextExtentPoint32(dc, text, (int)strlen(text), &act);
+
+            act.cx += SPACE_WIDTH;
+            if (columnWidthAge < act.cx)
+                columnWidthAge = act.cx;
+        }
+
         ListBox->HeaderLine.SetMinWidths();
 
         FullWidthOfNameCol = (WORD)columnWidthName;
@@ -3974,6 +4008,9 @@ void CFilesWindow::RefreshListBox(int suggestedXOffset,
                     break;
                 case COLUMN_ID_TIME:
                     column->Width = (WORD)columnWidthTime;
+                    break;
+                case COLUMN_ID_AGE:
+                    column->Width = (WORD)columnWidthAge;
                     break;
                 case COLUMN_ID_ATTRIBUTES:
                     column->Width = (WORD)columnWidthAttr;
@@ -4029,7 +4066,8 @@ void CFilesWindow::RefreshListBox(int suggestedXOffset,
         }
 
         // osetrime Smart Mode sloupce Name
-        BOOL leftPanel = (MainWindow->LeftPanel == this);
+        //  this needs attention
+        BOOL leftPanel = IsLeftPanel();
         if (Columns[0].FixedWidth == 0 &&
             (leftPanel && ViewTemplate->LeftSmartMode || !leftPanel && ViewTemplate->RightSmartMode) &&
             ListBox->FilesRect.right - ListBox->FilesRect.left > 0) // jen pokud uz je files-box inicializovany

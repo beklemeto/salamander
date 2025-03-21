@@ -627,7 +627,7 @@ void CFilesWindow::ChangeAttr(BOOL setCompress, BOOL compressed, BOOL setEncrypt
             // snizime prioritu threadu na "normal" (aby operace prilis nezatezovaly stroj)
             SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
 
-            int panel = MainWindow->LeftPanel == this ? PANEL_LEFT : PANEL_RIGHT;
+            int panel = GetWindowPanelType();
 
             int count = GetSelCount();
             int selectedDirs = 0;
@@ -674,8 +674,7 @@ void CFilesWindow::FindFile()
         GetPluginFS()->IsServiceSupported(FS_SERVICE_OPENFINDDLG))
     { // zkusime otevrit Find pro FS v panelu, pokud se povede, nema uz smysl otevirat standardni Find
         SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
-        BOOL done = GetPluginFS()->OpenFindDialog(GetPluginFS()->GetPluginFSName(),
-                                                  this == MainWindow->LeftPanel ? PANEL_LEFT : PANEL_RIGHT);
+        BOOL done = GetPluginFS()->OpenFindDialog(GetPluginFS()->GetPluginFSName(), GetWindowPanelType());
         SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
         if (done)
             return;

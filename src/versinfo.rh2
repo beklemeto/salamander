@@ -17,9 +17,9 @@
 #define VERSINFO_VERSION     VERSINFO_SALAMANDER_VERSION
 
 #define VERSINFO_COPYRIGHT   "Copyright © 1997-2023 Open Salamander Authors"
-#define VERSINFO_COMPANY     "Open Salamander"
+#define VERSINFO_COMPANY     "Quad Salamander"
 
-#define VERSINFO_DESCRIPTION "Open Salamander, File Manager"
+#define VERSINFO_DESCRIPTION "Quad Salamander, File Manager"
 #define VERSINFO_COMMENT     "A small and fast two-pane file manager with open plugin architecture."
 
 #ifdef _LANG

@@ -1966,6 +1966,31 @@ BOOL CDrivesList::BuildData(BOOL noTimeout, TDirectArray<CDriveData>* copyDrives
         AddToDrives(drv, IDS_MYDOCUMENTS, ';', drvtMyDocuments, getGrayIcons,
                     SalLoadIcon(ImageResDLL, 112, iconSize));
     }
+    if (Configuration.ChangeDriveShowDownloads)
+    {
+        AddToDrives(drv, IDS_DOWNLOADS, ';', drvtDownloads, getGrayIcons,
+                    SalLoadIcon(ImageResDLL, 184, iconSize));
+    }
+    if (Configuration.ChangeDriveShowDesktop)
+    {
+        AddToDrives(drv, IDS_DESKTOP, ';', drvtDesktop, getGrayIcons,
+                    SalLoadIcon(ImageResDLL, 183, iconSize));
+    }
+    if (Configuration.ChangeDriveShowMyVideos)
+    {
+        AddToDrives(drv, IDS_MYVIDEOS, ';', drvtMyVideos, getGrayIcons,
+                    SalLoadIcon(ImageResDLL, 189, iconSize));
+    }
+    if (Configuration.ChangeDriveShowMyPictures)
+    {
+        AddToDrives(drv, IDS_MYPICTURES, ';', drvtMyPictures, getGrayIcons,
+                    SalLoadIcon(ImageResDLL, 113, iconSize));
+    }
+    if (Configuration.ChangeDriveShowMyMusic)
+    {
+        AddToDrives(drv, IDS_MYMUSIC, ';', drvtMyMusic, getGrayIcons,
+                    SalLoadIcon(ImageResDLL, 108, iconSize));
+    }
 
     // adding Cloud Storages (Google Drive, etc.), if I find any...
     CachedCloudStoragesMask = 0;
@@ -2488,6 +2513,11 @@ BOOL IncludeDriveInDriveBar(CDriveTypeEnum dt)
     case drvtCDROM:
     case drvtRAMDisk:
     case drvtMyDocuments:
+    case drvtMyVideos:
+    case drvtMyPictures:
+    case drvtMyMusic:
+    case drvtDownloads:
+    case drvtDesktop:
     case drvtGoogleDrive:
     case drvtDropbox:
     case drvtOneDrive:
@@ -2533,7 +2563,9 @@ BOOL CDrivesList::FillDriveBar(CDriveBar* driveBar, BOOL bar2)
         TLBI_ITEM_INFO2 tii;
         tii.Mask = TLBI_MASK_STYLE | TLBI_MASK_IMAGEINDEX | TLBI_MASK_OVERLAY | TLBI_MASK_ID;
         tii.Style = item->DriveType == drvtOneDriveMenu ? TLBI_STYLE_WHOLEDROPDOWN | TLBI_STYLE_DROPDOWN : TLBI_STYLE_NOPREFIX;
-        if (item->DriveType != drvtMyDocuments && item->DriveType != drvtNeighborhood && item->DriveType != drvtPluginCmd &&
+        if (item->DriveType != drvtMyDocuments && item->DriveType != drvtDownloads && item->DriveType != drvtDesktop && 
+            item->DriveType != drvtMyPictures && item->DriveType != drvtMyVideos && item->DriveType != drvtMyMusic &&
+            item->DriveType != drvtNeighborhood && item->DriveType != drvtPluginCmd &&
             item->DriveType != drvtGoogleDrive && item->DriveType != drvtDropbox && item->DriveType != drvtOneDrive &&
             item->DriveType != drvtOneDriveBus && item->DriveType != drvtOneDriveMenu)
         {
@@ -2669,6 +2701,21 @@ BOOL CDrivesList::GetDriveBarToolTip(int index, char* text)
 
     case drvtMyDocuments:
         strcpy(text, LoadStr(IDS_MYDOCUMENTS));
+        break;
+    case drvtDownloads:
+        strcpy(text, LoadStr(IDS_DOWNLOADS));
+        break;
+    case drvtDesktop:
+        strcpy(text, LoadStr(IDS_DESKTOP));
+        break;
+    case drvtMyVideos:
+        strcpy(text, LoadStr(IDS_MYVIDEOS));
+        break;
+    case drvtMyPictures:
+        strcpy(text, LoadStr(IDS_MYPICTURES));
+        break;
+    case drvtMyMusic:
+        strcpy(text, LoadStr(IDS_MYMUSIC));
         break;
     case drvtGoogleDrive:
         strcpy(text, LoadStr(IDS_GOOGLEDRIVE));
@@ -2917,6 +2964,11 @@ BOOL CDrivesList::OnContextMenu(BOOL posByMouse, int itemIndex, int panel, const
     case drvtNeighborhood:
     case drvtOtherPanel:
     case drvtMyDocuments:
+    case drvtMyVideos:
+    case drvtMyPictures:
+    case drvtMyMusic:
+    case drvtDownloads:
+    case drvtDesktop:
     case drvtGoogleDrive:
     case drvtDropbox:
     case drvtOneDrive:
