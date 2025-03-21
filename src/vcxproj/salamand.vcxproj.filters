@@ -60,9 +60,6 @@
     <ClCompile Include="..\dialogs3.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
-    <ClCompile Include="..\dialogs4.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
     <ClCompile Include="..\dialogs5.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
@@ -96,9 +93,6 @@
     <ClCompile Include="..\filesmap.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
-    <ClCompile Include="..\fileswn0.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
     <ClCompile Include="..\fileswn1.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
@@ -123,9 +117,6 @@
     <ClCompile Include="..\fileswn8.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
-    <ClCompile Include="..\fileswn9.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
     <ClCompile Include="..\fileswna.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
@@ -136,12 +127,6 @@
       <Filter>cpp</Filter>
     </ClCompile>
     <ClCompile Include="..\find.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\finddlg1.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\finddlg2.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
     <ClCompile Include="..\geticon.cpp">
@@ -165,21 +150,6 @@
     <ClCompile Include="..\logo.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
-    <ClCompile Include="..\mainwnd1.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\mainwnd2.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\mainwnd3.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\mainwnd4.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\mainwnd5.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
     <ClCompile Include="..\mapi.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
@@ -196,9 +166,6 @@
       <Filter>cpp</Filter>
     </ClCompile>
     <ClCompile Include="..\menu3.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\menu4.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
     <ClCompile Include="..\menubar.cpp">
@@ -273,9 +240,6 @@
     <ClCompile Include="..\salamdr3.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
-    <ClCompile Include="..\salamdr4.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
     <ClCompile Include="..\salamdr5.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
@@ -333,43 +297,10 @@
     <ClCompile Include="..\thumbnl.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
-    <ClCompile Include="..\toolbar1.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\toolbar2.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\toolbar3.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\toolbar4.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\toolbar5.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\toolbar6.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\toolbar7.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\toolbar8.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
     <ClCompile Include="..\tooltip.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
     <ClCompile Include="..\versinfo.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\viewer.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\viewer2.cpp">
-      <Filter>cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\viewer3.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
     <ClCompile Include="..\worker.cpp">
@@ -494,6 +425,78 @@
     </ClCompile>
     <ClCompile Include="..\common\multimon.cpp">
       <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\mainwnd5.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\mainwnd4.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\mainwnd3.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\mainwnd2.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\mainwnd1.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\toolbar8.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\toolbar7.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\toolbar5.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\toolbar6.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\toolbar4.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\toolbar3.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\toolbar2.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\toolbar1.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\viewer3.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\viewer2.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\viewer.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\menu4.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dialogs4.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\fileswn9.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\salamdr4.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\numutils.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\finddlg1.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\finddlg2.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\fileswn0.cpp">
+      <Filter>cpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -759,6 +762,9 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\common\multimon.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\numutils.h">
       <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
