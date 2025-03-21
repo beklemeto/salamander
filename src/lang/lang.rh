@@ -131,6 +131,10 @@
 #define IDC_VIEW_RIGHT_FIXED            326
 #define IDC_VIEW_LEFT_WIDTH             327
 #define IDC_VIEW_RIGHT_WIDTH            328
+#define IDC_VIEW_BOTTOMLEFT_FIXED             1325
+#define IDC_VIEW_BOTTOMRIGHT_FIXED            1326
+#define IDC_VIEW_BOTTOMLEFT_WIDTH             1327
+#define IDC_VIEW_BOTTOMRIGHT_WIDTH            1328
 #define IDC_VIEW_TEXT2                  329
 #define IDC_VIEW_TEXT1                  330
 #define IDC_VIEW_TEXT3                  331
@@ -138,8 +142,12 @@
 #define IDC_VIEW_TEXT5                  333
 #define IDC_VIEW_TEXT6                  334
 #define IDC_VIEW_TEXT7                  335
+#define IDC_VIEW_TEXT8                      1332
+#define IDC_VIEW_TEXT9                      1333
 #define IDC_VIEW_LEFT_SMARTMODE         336
 #define IDC_VIEW_RIGHT_SMARTMODE        337
+#define IDC_VIEW_BOTTOMLEFT_SMARTMODE         1336
+#define IDC_VIEW_BOTTOMRIGHT_SMARTMODE        1337
 #define IDD_CFGPAGE_USERMENU            350
 #define IDL_MENUITEMS                   351
 #define IDE_COMMAND                     352
@@ -294,6 +302,11 @@
 #define IDC_USESALOPEN                  597
 #define IDC_FULLROWHIGHLIGHT            601
 #define IDC_CHD_SHOWMYDOC               602
+#define IDC_CHD_SHOWMYVID               1603
+#define IDC_CHD_SHOWMYMUS               1604
+#define IDC_CHD_SHOWMYPIC               1605
+#define IDC_CHD_SHOWDESKTOP             1606
+#define IDC_CHD_SHOWDOWNLOADS           1607
 #define IDC_QUICKRENAME_SELALL          603
 #define IDC_ONLYONEINSTANCE             604
 #define IDC_FULLROWSELECT               605

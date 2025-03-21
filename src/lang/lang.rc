@@ -1,4 +1,4 @@
-﻿// Microsoft Visual C++ generated resource script.
+// Microsoft Visual C++ generated resource script.
 //
 #pragma code_page(65001)
 
@@ -60,7 +60,7 @@ END
 
 IDD_BETAEXPIRED DIALOGEX 84, 53, 291, 80
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-CAPTION "Open Salamander"
+CAPTION "Quad Salamander"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "E&xit",IDCANCEL,92,57,50,14,WS_GROUP
@@ -174,7 +174,7 @@ BEGIN
     RTEXT           "mask hints",IDC_FILEMASK_HINT,250,169,38,8,NOT WS_GROUP | WS_TABSTOP
 END
 
-IDD_CFGPAGE_VIEWS DIALOGEX 51, 24, 299, 231
+IDD_CFGPAGE_VIEWS DIALOGEX 51, 24, 297, 303
 STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_CAPTION
 CAPTION "Views"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
@@ -185,21 +185,33 @@ BEGIN
     CONTROL         "",IDC_VIEW_LIST2,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,182,36,114,99
     LTEXT           "Views in detailed mode can contain all columns shown in Available Columns list.",IDC_VIEW_TEXT1,1,2,269,8
     LTEXT           "Choose columns from this list which you would like to see in selected view.",IDC_VIEW_TEXT3,1,12,252,8
-    GROUPBOX        " Set width of selected column from Available Columns list: ",IDC_VIEW_TEXT4,1,141,295,50,WS_GROUP
-    CONTROL         "&Fixed column width in left panel:",IDC_VIEW_LEFT_FIXED,
-                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,9,152,122,12
-    EDITTEXT        IDC_VIEW_LEFT_WIDTH,138,152,26,12,ES_AUTOHSCROLL | WS_GROUP
-    LTEXT           "pixels (drag width in Header line)",IDC_VIEW_TEXT2,167,154,114,8
-    CONTROL         "Fi&xed column width in right panel:",IDC_VIEW_RIGHT_FIXED,
-                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,9,166,128,12
-    EDITTEXT        IDC_VIEW_RIGHT_WIDTH,138,166,26,12,ES_AUTOHSCROLL | WS_GROUP
-    LTEXT           "pixels (drag width in Header line)",IDC_VIEW_TEXT5,167,168,114,8
-    LTEXT           "Note: unchecked = column width fits to the longest value in column",IDC_VIEW_TEXT6,9,180,231,8
-    GROUPBOX        " Set smart mode (narrow Name column to reduce scrolling) for selected view in: ",IDC_VIEW_TEXT7,1,194,295,37,WS_GROUP
+    GROUPBOX        " Set width of selected column from Available Columns list: ",IDC_VIEW_TEXT4,0,142,295,87,WS_GROUP
+    CONTROL         "&Fixed column width in bottom left panel:",IDC_VIEW_BOTTOMLEFT_FIXED,
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,7,178,117,12
+    EDITTEXT        IDC_VIEW_BOTTOMLEFT_WIDTH,135,178,26,12,ES_AUTOHSCROLL | WS_GROUP
+    LTEXT           "pixels (drag width in Header line)",IDC_VIEW_TEXT8,164,178,114,8
+    CONTROL         "Fi&xed column width in bottom right panel:",IDC_VIEW_BOTTOMRIGHT_FIXED,
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,7,190,121,12
+    EDITTEXT        IDC_VIEW_BOTTOMRIGHT_WIDTH,135,190,26,12,ES_AUTOHSCROLL | WS_GROUP
+    LTEXT           "pixels (drag width in Header line)",IDC_VIEW_TEXT9,164,190,114,8
+    LTEXT           "Note: unchecked = column width fits to the longest value in column",IDC_VIEW_TEXT6,7,214,231,8
+    GROUPBOX        " Set smart mode (narrow Name column to reduce scrolling) for selected view in: ",IDC_VIEW_TEXT7,0,232,295,65,WS_GROUP
     CONTROL         "&Left panel (only for non-fixed width of Name column; use Ctrl+N in left panel)",IDC_VIEW_LEFT_SMARTMODE,
-                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,9,204,274,12
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,7,242,274,12
     CONTROL         "&Right panel (only for non-fixed width of Name column; use Ctrl+N in right panel)",IDC_VIEW_RIGHT_SMARTMODE,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,9,217,285,12
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,254,285,12
+    CONTROL         "Bottom left panel (only for non-fixed width of Name column; use Ctrl+N in bottom left panel)",IDC_VIEW_BOTTOMLEFT_SMARTMODE,
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,7,266,285,12
+    CONTROL         "Bottom right panel (only for non-fixed width of Name column; use Ctrl+N in bottom right panel)",IDC_VIEW_BOTTOMRIGHT_SMARTMODE,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,278,287,12
+    CONTROL         "&Fixed column width in left panel:",IDC_VIEW_LEFT_FIXED,
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,7,154,122,12
+    CONTROL         "Fi&xed column width in right panel:",IDC_VIEW_RIGHT_FIXED,
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,7,166,128,12
+    EDITTEXT        IDC_VIEW_RIGHT_WIDTH,135,166,26,12,ES_AUTOHSCROLL | WS_GROUP
+    EDITTEXT        IDC_VIEW_LEFT_WIDTH,135,154,26,12,ES_AUTOHSCROLL | WS_GROUP
+    LTEXT           "pixels (drag width in Header line)",IDC_VIEW_TEXT2,164,154,114,8
+    LTEXT           "pixels (drag width in Header line)",IDC_VIEW_TEXT5,164,166,114,8
 END
 
 IDD_CFGPAGE_VIEWER DIALOGEX 16, 4, 299, 231
@@ -637,7 +649,7 @@ BEGIN
     LTEXT           "Copyright © 1997-2023 Open Salamander Authors",IDC_STATIC_1,10,97,196,8
     LTEXT           "Web:",IDC_STATIC_3,10,108,20,8
     LTEXT           "www.altap.cz",IDC_ABOUT_WWW,31,108,64,8,WS_TABSTOP
-    LTEXT           "Open Salamander is free software",IDC_STATIC_4,10,119,165,8
+    LTEXT           "Quad Salamander is free software",IDC_STATIC_4,10,119,165,8
     LTEXT           "Licensed under GNU General Public License version 2 or later",IDC_STATIC_5,10,130,214,8
     CONTROL         "",IDC_ABOUT_BOTTOM,"Static",SS_ETCHEDHORZ | WS_GROUP,2,154,294,1
 END
@@ -1194,7 +1206,7 @@ END
 
 IDD_TASKLIST DIALOGEX 12, 24, 324, 149
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-CAPTION "Open Salamander Task List"
+CAPTION "Quad Salamander Task List"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "&List of running Open Salamander tasks:",IDC_STATIC_1,6,4,150,8
@@ -1740,7 +1752,7 @@ END
 
 IDD_EXITINGOPENSAL DIALOGEX 10, 24, 259, 88
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-CAPTION "Exiting Open Salamander"
+CAPTION "Exiting Quad Salamander"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Cancel",IDCANCEL,195,67,50,14
@@ -1856,18 +1868,23 @@ BEGIN
     LISTBOX         IDL_CHD_DRIVES,9,41,277,12,LBS_MULTIPLESEL | LBS_OWNERDRAWFIXED | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | LBS_DISABLENOSCROLL | LBS_NODATA | WS_TABSTOP
     LTEXT           "S&elect drives that should be followed by separator:",IDC_STATIC_4,9,60,172,8
     LISTBOX         IDL_CHD_SEPARATORS,9,70,277,12,LBS_MULTIPLESEL | LBS_OWNERDRAWFIXED | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | LBS_DISABLENOSCROLL | LBS_NODATA | WS_TABSTOP
-    GROUPBOX        " Additional items ",IDC_STATIC_5,1,99,294,73,WS_GROUP
-    CONTROL         "&Documents",IDC_CHD_SHOWMYDOC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,9,113,55,12
+    GROUPBOX        " Additional items ",IDC_STATIC_5,1,99,294,85,WS_GROUP
+    CONTROL         "&Documents",IDC_CHD_SHOWMYDOC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,201,111,55,12
+    CONTROL         "&Videos",IDC_CHD_SHOWMYVID,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,201,121,55,12
+    CONTROL         "&Pictures",IDC_CHD_SHOWMYPIC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,102,121,55,12
+    CONTROL         "&Music",IDC_CHD_SHOWMYMUS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,11,121,55,12
+    CONTROL         "&Downloads",IDC_CHD_SHOWDOWNLOADS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,102,111,55,12
+    CONTROL         "&Desktop",IDC_CHD_SHOWDESKTOP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,11,111,55,12
     CONTROL         "&Cloud Storage Services",IDC_CHD_SHOWCLOUDSTORAGE,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,9,126,100,12
-    CONTROL         "&Network",IDC_CHD_SHOWNET,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,9,139,44,12
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,11,143,100,12
+    CONTROL         "&Network",IDC_CHD_SHOWNET,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,11,153,44,12
     CONTROL         "As &Other Panel (only in Change Drive menu)",IDC_CHD_SHOWANOTHER,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,9,152,161,12
-    LTEXT           "How to change visibility of ",IDC_STATIC_6,1,181,91,8
-    LTEXT           "Hot Path",IDS_CHD_HOTPATHS,92,181,30,8,WS_TABSTOP
-    LTEXT           "and",IDC_STATIC_7,125,181,15,8
-    LTEXT           "Plugin FS",IDS_CHD_PLUGINS,142,181,33,8,WS_TABSTOP
-    LTEXT           "items.",IDC_STATIC_8,175,181,22,8
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,11,163,161,12
+    LTEXT           "How to change visibility of ",IDC_STATIC_6,2,187,91,8
+    LTEXT           "Hot Path",IDS_CHD_HOTPATHS,93,187,30,8,WS_TABSTOP
+    LTEXT           "and",IDC_STATIC_7,126,187,15,8
+    LTEXT           "Plugin FS",IDS_CHD_PLUGINS,143,187,33,8,WS_TABSTOP
+    LTEXT           "items.",IDC_STATIC_8,176,187,22,8
 END
 
 IDD_CFGPAGE_PANELS DIALOGEX 64, 22, 299, 231
@@ -2066,7 +2083,7 @@ END
 
 IDD_SALMON_MAIN DIALOGEX 81, 47, 351, 199
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-CAPTION "Open Salamander Bug Reporter"
+CAPTION "Quad Salamander Bug Reporter"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "A problem has occured, forcing Open Salamander to close. To help us avoid similar problems in the future, please send an error report below.",IDC_SALMON_INTRO,8,9,336,16
@@ -2142,6 +2159,9 @@ BEGIN
 
     IDD_CFGPAGE_VIEWS, DIALOG
     BEGIN
+        VERTGUIDE, 106
+        BOTTOMMARGIN, 297
+        HORZGUIDE, 297
     END
 
     IDD_CFGPAGE_VIEWER, DIALOG
@@ -2378,6 +2398,11 @@ BEGIN
 END
 
 IDD_IMPORTCONFIG AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_CFGPAGE_CHANGEDRIVE AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
